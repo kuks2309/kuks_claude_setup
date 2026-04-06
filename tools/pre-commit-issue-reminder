@@ -1,0 +1,21 @@
+#!/bin/bash
+# pre-commit hook: issues_and_fixes.md 기록 알림
+# src/ 코드 수정 시 issues_and_fixes.md 미수정이면 경고 (차단 아님)
+
+STAGED_SRC=$(git diff --cached --name-only | grep "^src/")
+STAGED_ISSUES=$(git diff --cached --name-only | grep "issues_and_fixes.md")
+
+if [ -n "$STAGED_SRC" ] && [ -z "$STAGED_ISSUES" ]; then
+    echo ""
+    echo "  ================================================"
+    echo "  src/ 코드가 수정되었지만"
+    echo "  issues_and_fixes.md가 업데이트되지 않았습니다."
+    echo ""
+    echo "  이슈 해결이라면 기록해주세요:"
+    echo "    docs/issues_fixes/issues_and_fixes.md"
+    echo "  ================================================"
+    echo ""
+fi
+
+# 경고만 표시, 커밋은 항상 허용
+exit 0
