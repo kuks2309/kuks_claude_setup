@@ -1,86 +1,103 @@
 ---
 name: issue-fix
-description: This skill should be used when the user asks to "fix issue", "fix this error", "이슈 해결", "이슈 기록", pastes an error log or build failure, or when a bug fix is completed and needs recording in issues_and_fixes.md.
+description: Use when fixing a bug, diagnosing an error log, resolving a build failure, or recording a completed fix. Triggers on "fix issue", "버그 수정", "이슈 해결", pasted error/traceback, or after implementation is complete.
 ---
 
 # Issue Fix Workflow
 
-Automate the full diagnose-fix-record cycle for this ROS2 project. Every fix must produce two documentation updates per CLAUDE.md rules.
+Full diagnose → propose → implement → verify → record cycle. Works for Python, ROS2, and embedded projects.
 
 ## Workflow
 
 ### 1. Search Past Issues
 
-Read `docs/issues_fixes/issues_and_fixes.md` (first 200 lines). Grep for keywords from the current error. If a similar past issue exists, reference its root cause as a starting hypothesis.
+Read the issues log (first 200 lines):
+- `docs/issues_fixes/issues_and_fixes.md`
+- `issues_and_fixes/` directory (per-bug files)
+
+Grep for keywords from the current error. If a similar past issue exists, reference its root cause as a starting hypothesis.
 
 ### 2. Diagnose
 
-Gather evidence before proposing fixes:
+Gather evidence before proposing anything:
 
-- Read the error message completely. Identify the failing node, file, and line.
-- Run `grep` for the error string across `src/` to locate the origin.
-- Check `git log --oneline -10` and `git diff HEAD~3` for recent changes that may have introduced the regression.
-- Form a root-cause hypothesis with file:line evidence.
+- Read the error completely. Identify failing file and line.
+- `grep` for the error string across source files.
+- `git log --oneline -10` and `git diff HEAD~3` for recent regressions.
+- Form a root-cause hypothesis with `file:line` evidence.
 
-### 3. Propose Fix
+For multiple bugs, assess severity:
 
-Present the diagnosis to the user before implementing:
+| 심각도 | 기준 |
+|--------|------|
+| CRITICAL | 시스템 중단·데드락 직접 원인 |
+| HIGH | 통신 안정성·스레드 안전성 위협 |
+| MEDIUM | API 신뢰성·데이터 무결성 |
+| LOW | 품질·유지보수성 |
 
-- 증상 (symptom): what is observed
-- 원인 (root cause): why it happens, citing file:line
-- 해결 (proposed fix): minimal change to resolve
-- Wait for user approval before proceeding.
+### 3. Propose Fix (Wait for Approval)
+
+Present before implementing:
+
+- **증상**: what is observed
+- **원인**: why it happens — `file:line` evidence
+- **해결**: minimal change (줄 수 명시)
+- **테스트**: which tests will pass / convert from xfail
+
+**Wait for user approval before writing any code.**
 
 ### 4. Implement
 
-Apply the approved fix. Follow CLAUDE.md rules:
-
-- One function at a time: read, write, verify.
-- Check for duplicate functions/variables before adding new ones.
-- For Nav Tool changes, verify both `tm_nav_tool` and `wcs_gui_node.py`.
+Apply the approved fix. Read the target file first, change only the minimum needed.
 
 ### 5. Verify
 
-Build the affected package(s):
-
+**Python:**
 ```bash
-cd ~/T-Robot_nav_ros2_ws && colcon build --packages-select <PKG>
+python -m pytest tests/ -v
+# or specific file
+python -m pytest tests/test_<module>.py -v
 ```
 
-Run tests if available. Confirm zero build errors before proceeding.
+**ROS2:**
+```bash
+colcon build --packages-select <PKG>
+```
+
+Confirm zero errors / all expected tests pass before recording.
 
 ### 6. Record (MANDATORY)
 
 Both files must be updated. Newest entry at top.
 
-**A) `docs/issues_fixes/issues_and_fixes.md`** -- prepend after the `---` separator on line 5:
+**A) Issues log** — prepend after the separator:
 
-```
-## [YYYY-MM-DD HH:MM] <package> -- <title>
+```markdown
+## YYYY-MM-DD
 
-### 증상
+### [Fix] <title>
 
-### 원인
-
-### 해결책
-
-### 관련 파일
-```
-
-**B) `docs/<package>_code_updates.md`** -- prepend under today's date heading:
-
-```
-### HH:MM - <7-char hash> / <title>
-- **추가|수정|삭제** `<relative path>`
+- **문제**: symptom
+- **원인**: root cause — `file:line`
+- **해결**: what was changed (N줄 수정/삭제/추가)
+- **파일**: list of modified files
+- **상태**: 완료
 ```
 
-Stage all changed files with `git add` (specific files, not `-A`).
+**B) Code updates** — `docs/<package>_code_updates.md`:
+
+```markdown
+## YYYY-MM-DD / HH:MM — <7-char hash>
+- [수정/추가/삭제] 설명 (`relative/path/file.py`)
+```
+
+Stage with `git add <specific files>` — never `git add .` or `git add -A`.
 
 ## Completion Checklist
 
-- [ ] Root cause identified with file:line
-- [ ] User approved the fix before implementation
-- [ ] Build passes (`colcon build` exit 0)
-- [ ] `issues_and_fixes.md` updated
-- [ ] `<pkg>_code_updates.md` updated
-- [ ] All modified files staged with `git add`
+- [ ] Root cause identified with `file:line`
+- [ ] User approved fix before implementation
+- [ ] Tests pass / xfail tests converted to pass
+- [ ] Issues log updated (newest entry first)
+- [ ] Code updates log updated
+- [ ] Modified files staged with `git add`
