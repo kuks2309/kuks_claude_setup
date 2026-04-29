@@ -1,0 +1,36 @@
+# Claude 작업 지침
+
+## 핵심 원칙
+
+1. **사용자가 지시한 사항만 수행한다**
+2. **임의로 기능을 추가하거나 변경하지 않는다**
+3. **작업 완료 후 지시한 내용만 했는지 확인하고 보고한다**
+4. **객관적인 사실을 가지고 판단한다**
+5. **관련 이론을 철저히 조사한다**
+
+## 프로젝트 성격
+
+{{PROJECT_DESCRIPTION}}
+
+## 참조 자료 규칙
+
+{{DOMAIN_REFERENCES}}
+
+## 문서 작업 규칙 (먼저 읽기)
+
+작업 영역에 따라 **시작 전 반드시** 해당 README 를 먼저 읽고 규칙을 따른다. 규칙은 각 파일이 단일 근원(Single Source of Truth) 이며 본 CLAUDE.md 에 복제하지 않는다.
+
+### Claude 작업 지침 (메타 규칙)
+
+- 진입점 → [docs/claude_guideline/README.md](docs/claude_guideline/README.md)
+  - GitHub 워크플로 → [docs/claude_guideline/github.md](docs/claude_guideline/github.md)
+  - 코드 작업 규칙 → [docs/claude_guideline/coding.md](docs/claude_guideline/coding.md)
+  - 작업 절차 체크리스트 → [docs/claude_guideline/workflow.md](docs/claude_guideline/workflow.md)
+  - 문서 작성 방법 → [docs/claude_guideline/documentation.md](docs/claude_guideline/documentation.md)
+  - 프로젝트별 override → [docs/claude_guideline/local/](docs/claude_guideline/local/)
+
+### 도메인 문서 SSOT
+
+{{DOMAIN_SSOT_LIST}}
+
+규칙 변경이 필요하면 해당 README 수정 여부를 먼저 사용자에게 문의한다.
