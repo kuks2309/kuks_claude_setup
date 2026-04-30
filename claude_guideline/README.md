@@ -12,6 +12,7 @@ Claude 가 본 프로젝트(CRCS)에서 어떻게 일할지 정의하는 메타 
 | 코드 작업 규칙 (금지사항 + 수정 규칙) | [coding.md](coding.md) |
 | 작업 절차 체크리스트 (시작/종료) | [workflow.md](workflow.md) |
 | 문서 작성 방법 (메타 규칙) | [documentation.md](documentation.md) |
+| 기술 부채 방지 (정공법 우선) | [tech_debt.md](tech_debt.md) |
 
 ## 규칙 변경
 

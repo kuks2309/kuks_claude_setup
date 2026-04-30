@@ -53,7 +53,7 @@ fi
 # 백업
 BACKUP_DIR="$SCRIPT_DIR/.backup-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR"
-for f in README.md github.md coding.md workflow.md documentation.md VERSION CHANGELOG.md update.sh; do
+for f in README.md github.md coding.md workflow.md documentation.md tech_debt.md VERSION CHANGELOG.md update.sh; do
   if [ -f "$SCRIPT_DIR/$f" ]; then
     cp "$SCRIPT_DIR/$f" "$BACKUP_DIR/$f"
   fi
@@ -61,7 +61,7 @@ done
 echo "[+] 백업 완료: $BACKUP_DIR"
 
 # 새 파일 다운로드 (local/ 은 건드리지 않음)
-FILES=("README.md" "github.md" "coding.md" "workflow.md" "documentation.md" "VERSION" "CHANGELOG.md" "update.sh")
+FILES=("README.md" "github.md" "coding.md" "workflow.md" "documentation.md" "tech_debt.md" "VERSION" "CHANGELOG.md" "update.sh")
 for f in "${FILES[@]}"; do
   echo "[+] Downloading $f"
   curl -fsSL "$RAW_URL/$f" -o "$SCRIPT_DIR/$f"
