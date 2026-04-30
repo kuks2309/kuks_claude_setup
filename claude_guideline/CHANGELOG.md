@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 — 2026-04-30
+
+- `github.md`: "커밋·푸쉬는 작업 단위로 분리" 섹션 추가
+  - 작업 단위 = 커밋 단위 = push 단위 원칙
+  - staged 범위 검증 절차 (`git status --short`, `git diff --cached --name-only`)
+
 ## 1.0.0 — 2026-04-30
 
 - 초기 릴리스
