@@ -23,13 +23,22 @@
 ### Claude 작업 지침 (메타 규칙)
 
 - 진입점 → [docs/claude_guideline/README.md](docs/claude_guideline/README.md)
-  - GitHub 워크플로 → [docs/claude_guideline/github.md](docs/claude_guideline/github.md)
-  - 코드 작업 규칙 → [docs/claude_guideline/coding.md](docs/claude_guideline/coding.md)
+  - ROS2 / 임베디드 작업 규칙 → [docs/claude_guideline/ros2.md](docs/claude_guideline/ros2.md) (해당 프로젝트일 때)
   - 작업 절차 체크리스트 → [docs/claude_guideline/workflow.md](docs/claude_guideline/workflow.md)
+  - 코드 작업 규칙 → [docs/claude_guideline/coding.md](docs/claude_guideline/coding.md)
+  - GitHub 워크플로 → [docs/claude_guideline/github.md](docs/claude_guideline/github.md)
+  - 기술 부채 방지 → [docs/claude_guideline/tech_debt.md](docs/claude_guideline/tech_debt.md)
+  - 매뉴얼 / 데이터시트 보관·인용 → [docs/claude_guideline/manual.md](docs/claude_guideline/manual.md)
   - 문서 작성 방법 → [docs/claude_guideline/documentation.md](docs/claude_guideline/documentation.md)
-  - 프로젝트별 override → [docs/claude_guideline/local/](docs/claude_guideline/local/)
+  - 프로젝트별 비공개 override → [docs/claude_guideline/local/](docs/claude_guideline/local/)
 
-### 도메인 문서 SSOT
+## 모듈 CLAUDE.md (override 계층)
+
+다음 모듈은 자체 CLAUDE.md 를 가지며 충돌 시 **모듈 규칙이 루트보다 우선**한다.
+
+{{MODULE_CLAUDE_LIST}}
+
+## 도메인 문서 SSOT
 
 {{DOMAIN_SSOT_LIST}}
 
