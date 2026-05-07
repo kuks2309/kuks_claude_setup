@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.4.0 — 2026-05-07
+
+신규 워크스페이스 자산(스킬 / hook / 가이드라인 / 템플릿)이 SSOT 스킬 레포에 누락되지 않도록 등록 절차를 메타 규칙으로 표준화.
+
+### 추가된 파일
+
+- `skills.md` 신규 추가 — 스킬 / 자동화 자산 SSOT 등록 규칙 (적용 대상 5 종, 등록 절차 6 단계, 워크스페이스↔SSOT 우선순위, 비공개 자산 처리, deprecate 정책)
+
+### 보강된 파일
+
+- `README.md`: 진입점 표에 `skills.md` 행 추가
+- `templates/CLAUDE.md.template`: 메타 규칙 진입 링크에 `skills.md` 행 추가
+
+### 신규 정책 요약
+
+- 워크스페이스에서 만든 신규 스킬 / hook / 가이드라인 보강 / sub-agent / 도메인 템플릿은 SSOT 레포(`kuks_claude_setup`)에 등록한다.
+- 등록 전 워크스페이스 검증 필수, 비공개 / 환경 의존 부분은 placeholder 또는 `local/` 처리.
+- SSOT 가 단일 근원이며 워크스페이스 측 직접 수정 후 SSOT 갱신을 잊는 패턴 금지.
+
 ## 1.3.0 — 2026-05-05
 
 ROS2 + 임베디드 + 모듈 CLAUDE.md override 계층을 가진 워크스페이스에서 운영하면서 발견된 규칙 보강. FITO AMR ROS2 워크스페이스 배포에서 검증된 변경분 contributions.
