@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.6.2 — 2026-05-08
+
+`manual.md` §3 강화 — 역방향 비약 경고 + DataSheet vs User Manual 분리 추가.
+
+### 변경
+
+- `claude_guideline/manual.md`:
+  - **NEW §3.1 역방향 비약 경고**: datasheet → 운영점 해석 시 다음 비약 금지
+    - "TYP = 권장값" 비약 (datasheet 명시 없으면 단정 X)
+    - "Min/Max 안 = 무조건 OK" 비약 (footnote 측정 조건 충족 필요)
+    - "SDK 매크로 수정값 = TYP 일치 = 합리적" 비약 (commit 증거 필요)
+  - **NEW §3.2 DataSheet vs User Manual / Family Manual 분리**: pinout/전기 spec vs register-level/SR/DMA 토폴로지. 분석 대상에 따라 추가 PDF 필요. `manual/` 에 두 종류 모두 보관 권장.
+
+### 트리거
+
+20명 매뉴얼 근거 감사팀 (HFPDC ADC 프로젝트, 10 문서 × 2 워커) 의 발견:
+- "iLLD 매크로 수정 = datasheet TYP 와 일치 = 합리적" 단정에서 "TYP=권장" 역방향 비약 식별 (m-a, m-b)
+- DMA channelId / EVADC SR / GTM ADCTRIG mux 검증이 DataSheet 만으로 불가, User Manual/Family Manual 추가 필요 (w03-a, w03-b, w04-a, w04-b, w05-a, w05-b)
+- 측정 조건 (postcalibration, ENRMS, ripple, footnote 2/3) 미인용 시 INL/DNL/TUE 단정 ⓦ 격하 권고 (m-a, m-b, w06-b)
+
+본 패치로 manual.md 가 위 패턴 모두 명시적으로 경고. 다른 프로젝트도 동일 비약 회피 가능.
+
 ## 1.6.1 — 2026-05-08
 
 `manual.md` + `skills/manual-first.md` 일반화 — 1.6.0 에서 특정 프로젝트 (HFPDC) 의 칩 / SDK 고유명 (예: AURIX TC38x, fADCI, IfxEvadc 등) 이 SSOT 본문에 노출되어 있던 문제를 정정. SSOT 는 프로젝트 중립이어야 한다.

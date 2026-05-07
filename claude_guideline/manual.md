@@ -31,6 +31,28 @@
 - SDK 매크로 (예: 어느 벤더 SDK 의 `<PERIPHERAL>_<PARAM>_MAX` 형태 매크로) 에서 datasheet spec 추론 **금지**.
 - SDK 권장 범위 (예: docstring 의 "Range = [N, M]") 도 datasheet 와 별개. stale 가능성 항상 의심.
 
+### 3.1 역방향 비약 경고 (datasheet → 운영점 해석)
+
+datasheet 를 읽고 운영점을 해석할 때 다음 비약을 **금지**:
+
+- ❌ "TYP = 권장값" 비약: datasheet 의 TYP 컬럼은 **typical 측정 기준점** (대표 silicon, 25°C, 표준 조건). datasheet 가 명시적으로 "recommended operating point" 라 표기하지 않은 한 "TYP = 권장 운영값" 으로 단정 금지.
+- ❌ "Min/Max 안에 들어오면 무조건 OK" 비약: Min~Max 는 spec 보장 범위. 단 측정 조건 (postcalibration, ENRMS, ripple, 온도, 전압, 부하 등 footnote) 이 충족돼야 함. footnote 미인용 시 ⓦ 격하.
+- ❌ SDK 매크로 수정값 = datasheet TYP 와 일치 = "합리적 설정" 비약: 매크로 수정의 의도와 datasheet TYP 일치는 **우연** 일 수 있음. "매크로 수정자가 datasheet 보고 의도적으로 TYP 정렬" 단정은 commit 메시지 / PR 설명 등 별도 증거 필요.
+
+### 3.2 datasheet vs User Manual / Family Manual 분리
+
+벤더 문서 체계에서:
+
+- **DataSheet**: pinout, package, 전기 특성 (Operation Conditions, Electrical Characteristics), 일반 사양
+- **User Manual / Family Manual**: 모듈 (peripheral) 의 register-level 동작, IP 챕터, SR (service request) 라우팅, DMA/IRQ 토폴로지
+
+→ 한 PDF 에 모든 정보가 있지 않다. 분석 대상이 다음에 해당하면 추가 다운로드 필요:
+- Module register / SR / IRQ vector 매핑 → User Manual / Family Manual
+- DMA 채널 ↔ peripheral SR 매핑 → User Manual / Family Manual
+- 외부 trigger 라우팅 mux (예: GPT/PWM ↔ ADC trig) → User Manual / Family Manual
+
+`manual/` 폴더에 두 종류 모두 보관 권장: `<vendor>_<product>_DataSheet_vX.Y.pdf` + `<vendor>_<product>_UserManual_vX.Y.pdf`.
+
 ## 4. 추정 금지 · 실측 검증
 
 - 데이터시트의 모호한 표현(예: "정밀도 1/N", "최대 N pulse", 단위 미표기 수치)을 **추정으로 단정 적용하지 않는다**.
