@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.6.0 — 2026-05-08
+
+`manual.md` 강화 + `skills/manual-first.md` 신규 등록 — datasheet 미참조 거짓 단정 누적 방지.
+
+### `claude_guideline/manual.md` 강화 (42 줄 → 117 줄)
+
+- **NEW §3 source 분리**: `iLLD/SDK 매크로 ≠ silicon datasheet spec` — 본 룰의 핵심 원칙
+- **NEW §7 작업 전 체크리스트** (Pre-Work)
+- **NEW §8 작업 중 체크리스트** (In-Progress)
+- **NEW §9 작업 후 체크리스트** (Post-Work)
+- **NEW §10 검증 등급** (✓ 직접 / ⓦ 보고만 / ⚠ 추론) 강제 표기
+- **NEW §11 Datasheet 다운로드 표준 절차** (curl + pdftotext + grep)
+- **NEW §12 본 룰 위반 시 영향 (실제 사례)** — HFPDC 2026-05-08 ADC 분석 사례
+- 기존 SSOT 5 섹션 (보관 위치 / 인용 규칙 / 추정 금지·실측 검증 / 라이선스 / 누락 처리) 모두 보존 + 인용 형식 강제 (`[문서명 v버전, Table N, page P](경로)`)
+
+### `skills/manual-first.md` 신규
+
+- 키워드 (datasheet, 데이터시트, spec, 사양, INL, DNL, AEC-Q100, Operation Conditions, Electrical Characteristics, MHz, fADCI, fSPB, 위반, 초과, non-compliance, violation) 자동 트리거
+- 핵심 3 줄 요약 + 작업 전/중/후 체크리스트 + 다운로드 절차 + 도입 사례
+- SSOT 룰 ([`claude_guideline/manual.md`](claude_guideline/manual.md)) 진입점 역할
+
+### 트리거 사건
+
+HFPDC ADC 흐름도 분석 세션 (2026-05-08) — lead 가 iLLD `IFXEVADC_ANALOG_FREQUENCY_MAX = 20MHz` 매크로를 silicon datasheet spec 으로 비약 → "fADCI 33MHz가 datasheet 위반" 거짓 단정 → AEC-Q100 위반 / INL·DNL 무보증 등 downstream 거짓 결론 누적 → 검증팀 8명 launch 의 부분 전제 오염 → 다중 정정 라운드 (v2 → v2.2 → v2.3) 발생, 토큰 / 시간 낭비. 사용자가 datasheet PDF 직접 다운로드 후 검증: fADCI = 16/40/53.33 MHz Min/Typ/Max @ 5V VDDM (TC38x DataSheet v1.2, Table 3-21, page 316) → 33MHz = TYP 안쪽 정상. 본 룰 강화 + 스킬 등록으로 재발 방지.
+
 ## 1.5.0 — 2026-05-07
 
 - `iteration_anti_pattern.md` 신규 추가 — Iteration 반복 수정 방지 원칙
