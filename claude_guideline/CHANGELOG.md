@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.6.1 — 2026-05-08
+
+`manual.md` + `skills/manual-first.md` 일반화 — 1.6.0 에서 특정 프로젝트 (HFPDC) 의 칩 / SDK 고유명 (예: AURIX TC38x, fADCI, IfxEvadc 등) 이 SSOT 본문에 노출되어 있던 문제를 정정. SSOT 는 프로젝트 중립이어야 한다.
+
+### 변경
+
+- `claude_guideline/manual.md`:
+  - §3 source 분리 예시: 벤더 고유명 → "벤더 SDK / 드라이버 매크로", "`<PERIPHERAL>_<PARAM>_MAX`" 형태 일반 표현
+  - §11 다운로드 절차 grep 예시: 칩 고유 파라미터명 → `<parameter_name>` 형태
+  - §12 위반 사례: HFPDC 고유명 (AURIX, TC38x, fADCI, IfxEvadc) 모두 제거 → "어느 벤더 SDK 의 `<PARAMETER>_MAX` 매크로" 형태로 패턴만 보존. 상세 사례는 "프로젝트별 case study 파일" 로 outsource
+- `skills/manual-first.md`:
+  - 키워드 list 에서 칩 고유 파라미터 (`fADCI`, `fSPB`) 제거, 일반 spec 카테고리 (`INL`, `DNL`, `ENRMS`, 외부 표준 ISO/IEEE/UL/UN, 단위 등) 로 대체
+  - 도입 사례 섹션 추상화 (HFPDC 명 제거)
+- 기존 SSOT 5 섹션 (보관 위치 / 인용 / 추정금지 / 라이선스 / 누락처리) + 신규 6 섹션 (체크리스트 / 등급 / 다운로드 절차 / 변경 절차) 모두 보존, 본 패치는 표현 일반화만
+
+### 트리거
+
+1.6.0 push 직후 사용자 정정: "일반화를 해야지 특정 프로젝트용이면 안됨". SSOT 의 재사용성 보장을 위해 즉시 일반화 패치.
+
 ## 1.6.0 — 2026-05-08
 
 `manual.md` 강화 + `skills/manual-first.md` 신규 등록 — datasheet 미참조 거짓 단정 누적 방지.

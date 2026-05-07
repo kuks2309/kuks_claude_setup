@@ -2,7 +2,7 @@
 
 외부 벤더의 매뉴얼·데이터시트·프로토콜 명세를 어디에 보관하고, 어떻게 인용하며, 어떻게 검증할지 정하는 단일 근원. 본 룰 위반 시 거짓 단정 누적으로 다중 정정 라운드 / 토큰 낭비 / 신뢰 손상이 발생한다 (실제 사례 §12 참조).
 
-본 룰은 OMC Skill `manual-first` 로도 등록되어 키워드 (datasheet, 데이터시트, spec, 사양, INL, DNL, AEC-Q100, Operation Conditions, Electrical Characteristics, MHz, fADCI 등) 감지 시 자동 활성화된다.
+본 룰은 OMC Skill `manual-first` 로도 등록되어 spec 관련 키워드 (datasheet, 데이터시트, manual, 매뉴얼, spec, 사양, Operation Conditions, Electrical Characteristics, 위반, 초과, non-compliance, violation, 무보증 등) 감지 시 자동 활성화된다.
 
 ---
 
@@ -18,18 +18,18 @@
 
 - 코드 주석 / 문서에서 인용 시: **매뉴얼 이름·섹션·페이지**를 명시한다.
 - 인용한 매뉴얼의 상대 경로를 함께 적어 추적 가능하게 한다.
-- **강제 인용 형식**: `[문서명 v버전, Table N, page P](manual/파일명.pdf)`
-  - 예: `[TC38x DataSheet v1.2, Table 3-21, page 316](manual/infineon-tc38x-datasheet-en.pdf)`
+- **강제 인용 형식**: `[문서명 v버전, Table N, page P](경로/파일명.pdf)`
+  - 예: `[<Vendor> <Product> DataSheet vX.Y, Table N, page P](docs/manual/<vendor>/<product>/datasheet.pdf)`
 - 외부 매뉴얼에 의존하는 상수·환산식·시퀀스 코드는 매뉴얼 인용을 해당 상수/함수 바로 위에 둔다 ([coding.md](coding.md) "상수 분리 원칙" 와 결합).
 - 매뉴얼 버전 차이로 동작이 달라질 수 있는 부분은 **참조한 매뉴얼 버전**을 함께 명시한다.
 
 ## 3. source 분리 (가장 중요)
 
-- **iLLD / SDK 매크로 ≠ silicon datasheet spec** ← 본 룰의 핵심
-- iLLD docstring ≠ datasheet
+- **벤더 SDK / 드라이버 매크로 ≠ silicon (또는 device) datasheet spec** ← 본 룰의 핵심
+- SDK docstring (권장 사용 범위) ≠ datasheet (silicon spec)
 - 둘은 **별도 검증 항목** 으로 다룬다.
-- SDK 매크로 (예: `IFXEVADC_ANALOG_FREQUENCY_MAX`) 에서 datasheet spec 추론 **금지**.
-- iLLD 권장 범위 (예: docstring `Range = [5MHz, 10MHz]`) 도 datasheet 와 별개. stale 가능성 항상 의심.
+- SDK 매크로 (예: 어느 벤더 SDK 의 `<PERIPHERAL>_<PARAM>_MAX` 형태 매크로) 에서 datasheet spec 추론 **금지**.
+- SDK 권장 범위 (예: docstring 의 "Range = [N, M]") 도 datasheet 와 별개. stale 가능성 항상 의심.
 
 ## 4. 추정 금지 · 실측 검증
 
@@ -63,7 +63,7 @@
 분석 작업 시작 전 반드시 확인. 미충족 항목은 **진행 전 해결**:
 
 - [ ] 본 작업이 외부 spec / datasheet / 표준 / 인증에 의존하는가?
-- [ ] 의존한다면 1차 source (datasheet PDF) 가 `manual/` (또는 `docs/manual/<vendor>/<product>/`) 에 있는가?
+- [ ] 의존한다면 1차 source (datasheet PDF) 가 정해진 위치 (`manual/` 또는 `docs/manual/<vendor>/<product>/`) 에 있는가?
 - [ ] 없으면 사용자에게 source 제공 요청 → **받기 전 spec 관련 결론 보류**
 - [ ] 기존 문서 / AI 보고서에 검증 안 된 spec 주장이 있는가? (있으면 ⓦ/⚠ 격하 표시)
 - [ ] 분석 범위 결정 — datasheet 의존 부분 vs 코드 분석 부분 **명확히 분리**
@@ -74,9 +74,9 @@
 
 - [ ] 검증 등급 표시: **✓** (1차 source 직접) / **ⓦ** (다른 보고만) / **⚠** (UNVERIFIED)
 - [ ] ✓ 표시 = file:line 인용 또는 datasheet:page 인용 필수
-- [ ] iLLD / SDK 매크로 인용 시 → "**silicon spec 아님**" 명시
+- [ ] SDK / 드라이버 매크로 인용 시 → "**silicon (또는 device) spec 아님**" 명시
 - [ ] 강한 단정어 사용 룰 (강제):
-  - **금지 단어** (primary source 없이): `위반`, `초과`, `무보증`, `non-compliance`, `violation`, `fail`, `AEC-Q100 위반`
+  - **금지 단어** (primary source 없이): `위반`, `초과`, `무보증`, `non-compliance`, `violation`, `fail`, `규격 위반`, `인증 위반`
   - **사용 조건**: primary source 직접 인용 + page/table 번호 첨부 시에만
   - primary source 없을 시: `추정`, `의심`, `미확인`, `확인 필요` 등 약한 표현
 
@@ -85,7 +85,7 @@
 문서 완성 / 정정 라운드 종료 전:
 
 - [ ] 모든 **✓** 항목 = 인용 (file:line 또는 datasheet:page) 있는가?
-- [ ] iLLD / SDK 매크로 → silicon spec 비약 있는가? 있으면 **⚠** 로 격하
+- [ ] SDK / 드라이버 매크로 → silicon spec 비약 있는가? 있으면 **⚠** 로 격하
 - [ ] "위반 / fail / non-compliance" 단정어 사용 항목 = primary source 첨부?
 - [ ] 미검증 추론을 "✓" 로 표시한 곳 없는가?
 - [ ] 정정 이력 (vN → vN+1) 명시 — 무엇을 왜 정정?
@@ -104,29 +104,31 @@
 1. **`manual/` 먼저 확인** (이미 있으면 재다운로드 X)
 2. WebSearch 로 공식 PDF URL 확인
 3. 다운로드 시도:
-   - `curl -sSL -A "Mozilla/5.0" -o manual/file.pdf <URL>`
-   - infineon.com 등 직접 차단 시 미러 시도 (mouser, farnell, alldatasheet, digikey)
+   - `curl -sSL -A "Mozilla/5.0" -o manual/<file>.pdf <URL>`
+   - 벤더 사이트 직접 차단 시 미러 시도 (mouser, farnell, alldatasheet, digikey)
 4. **차단 시 사용자에게 수동 다운로드 요청** → 사용자가 `manual/` 에 배치
 5. **검증**: `file manual/<file>.pdf` 로 PDF 매직 바이트 확인 (HTML 차단 페이지 받지 않았는지)
-6. 텍스트 추출: `pdftotext -layout manual/file.pdf manual/file.txt`
-7. spec parameter 검색: `grep -in "fADCI\|Operation Conditions\|Electrical Characteristics" manual/file.txt`
+6. 텍스트 추출: `pdftotext -layout manual/<file>.pdf manual/<file>.txt`
+7. spec parameter 검색: `grep -in "<parameter_name>\|Operation Conditions\|Electrical Characteristics" manual/<file>.txt`
 8. spec 표 컨텍스트 (전후 50~100줄) `sed -n` 으로 발췌 후 분석
 9. 인용 시 §2 형식 강제
 
 ---
 
-## 12. 본 룰 위반 시 영향 (실제 사례)
+## 12. 본 룰 위반 시 일반 패턴 (사례 추상화)
 
-**2026-05-08 HFPDC ADC 흐름도 분석 세션** 에서 lead 가 본 룰을 위반한 사례:
+대표 위반 시퀀스 (실제 발생):
 
-1. iLLD `IFXEVADC_ANALOG_FREQUENCY_MAX = 20MHz` 매크로 (원본) 를 보고
-2. **datasheet spec 으로 비약** → "fADCI 33MHz 가 datasheet 위반" 거짓 단정
-3. downstream 거짓 결론 누적: "AEC-Q100 위반", "INL/DNL 무보증", "양산 위험"
-4. 검증팀 8명 launch 의 **부분 전제 오염** (5 Claude vw + 1 opus ar + 2 Codex 모두 결함을 사실로 받아들임)
-5. 다중 정정 라운드 (v2 → v2.2 → v2.3) 발생, 토큰 / 시간 낭비, 사용자 신뢰 손상
-6. 사용자가 datasheet PDF 직접 다운로드 후 검증: **fADCI = 16/40/53.33 MHz Min/Typ/Max @ 5V VDDM** (TC38x DataSheet v1.2, Table 3-21, page 316) → 33MHz = TYP 안쪽, 완전 정상
+1. AI 가 벤더 SDK 의 `<PARAMETER>_MAX` 매크로를 보고
+2. **silicon datasheet spec 으로 비약** → "현재 동작 값이 datasheet 위반" 거짓 단정
+3. downstream 거짓 결론 누적: "외부 표준(예: AEC-Q100, 안전인증) 위반", "정밀도(INL/DNL 등) 무보증", "제품 위험"
+4. 후속 검증/협업 워크플로 (병렬 워커, 외부 도구) 의 **부분 전제 오염** — 모두 거짓 단정을 사실로 받아들임
+5. 다중 정정 라운드 발생, 토큰 / 시간 낭비, 사용자 신뢰 손상
+6. 사용자가 datasheet PDF 직접 다운로드 후 검증 → spec 안쪽 정상 (TYP 값 근방), SDK 매크로는 SW 보수 한계였을 뿐
 
-**본 룰의 핵심**: "매크로/SDK ≠ datasheet" 를 항상 의식하고 1차 source 직접 확인을 강제한다. 사용자가 source 제공 가능성 확인 → 받기 전 단정 보류.
+**본 룰의 핵심**: "벤더 SDK / 드라이버 매크로 ≠ silicon (또는 device) datasheet spec" 을 항상 의식하고 1차 source 직접 확인을 강제한다. 사용자가 source 제공 가능성 확인 → 받기 전 단정 보류.
+
+프로젝트별 상세 사례는 해당 프로젝트의 case study 파일에 보존 (예: `<프로젝트>/docs/<분석명>/MASTER.md` 부록).
 
 ---
 
