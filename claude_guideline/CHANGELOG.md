@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.1 — 2026-05-07
+
+표현 수정 — `skills.md` 를 `skill_update.md` 로 rename. "스킬 목록" 으로 오해할 여지를 줄이고 "스킬 갱신·등록 절차" 의미를 명시화. 내용은 동일.
+
+- `skills.md` → `skill_update.md`
+- `README.md`, `templates/CLAUDE.md.template` 의 링크 갱신
+
 ## 1.4.0 — 2026-05-07
 
 신규 워크스페이스 자산(스킬 / hook / 가이드라인 / 템플릿)이 SSOT 스킬 레포에 누락되지 않도록 등록 절차를 메타 규칙으로 표준화.

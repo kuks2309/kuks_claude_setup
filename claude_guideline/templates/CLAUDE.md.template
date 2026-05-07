@@ -29,7 +29,7 @@
   - GitHub 워크플로 → [docs/claude_guideline/github.md](docs/claude_guideline/github.md)
   - 기술 부채 방지 → [docs/claude_guideline/tech_debt.md](docs/claude_guideline/tech_debt.md)
   - 매뉴얼 / 데이터시트 보관·인용 → [docs/claude_guideline/manual.md](docs/claude_guideline/manual.md)
-  - 스킬 / 자동화 자산 SSOT 등록 → [docs/claude_guideline/skills.md](docs/claude_guideline/skills.md)
+  - 스킬 / 자동화 자산 SSOT 등록 → [docs/claude_guideline/skill_update.md](docs/claude_guideline/skill_update.md)
   - 문서 작성 방법 → [docs/claude_guideline/documentation.md](docs/claude_guideline/documentation.md)
   - 프로젝트별 비공개 override → [docs/claude_guideline/local/](docs/claude_guideline/local/)
 
