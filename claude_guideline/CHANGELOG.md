@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.0 — 2026-05-07
+
+- `iteration_anti_pattern.md` 신규 추가 — Iteration 반복 수정 방지 원칙
+  - 핵심 원칙: 1 회 정공법 우선 (2 회 이상 부분 수정 시 전체 재작성 전환)
+  - 4 규칙: 기존 자료 우선 조사 / 모호한 단어 추측 금지 / 정정 시 임의 추가분 전체 감사 / 단일 파일도 구조 사전 승인
+  - Iteration Loop 탈출 규칙 (2 회 반복 시 작성 중지 + 단어 재정의 질문 + 전체 재작성)
+  - 본 규칙은 `coding.md` 및 `workflow.md` 를 강화하며 충돌 시 본 규칙 우선
+- `README.md`: 진입점 표에 `iteration_anti_pattern.md` 행 추가
+- 트리거 사건: ONE_LINERS.md 5 회 반복 수정 — `claude-mistake/2026-05-07.md` 참조
+
 ## 1.4.1 — 2026-05-07
 
 표현 수정 — `skills.md` 를 `skill_update.md` 로 rename. "스킬 목록" 으로 오해할 여지를 줄이고 "스킬 갱신·등록 절차" 의미를 명시화. 내용은 동일.
