@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.7.0 — 2026-05-09
+
+`request_handling_sop.md` 신규 — 사용자 지시사항 처리 9 단계 SOP 도입.
+
+### 변경
+
+- `claude_guideline/request_handling_sop.md`: NEW
+  - 9 단계 (지시 명확화 → requirements 기록 → 기존 자료 검색 → SSOT 룰 식별 → 사전 승인 → 실행 → 검증 → 결론 갱신 → 결과 보고)
+  - 각 단계 ✓ 체크 강제 (skip 시 거짓 단정 / 중복 작업 / 미승인 변경 위험)
+  - SOP 위반 시 영향 사례 (Step 2/3/4/5/7 skip 패턴, 익명화)
+  - Step 5 사전 승인 트리거 표 = 신 `github.md` ("기록" 4단계 자동) 와 정합 (외부 SSOT 는 push 직전 사용자 명시 확인)
+- `claude_guideline/README.md`: SOP 진입 항목 ★★ (표 최상단) 추가
+
+### 트리거
+
+임베디드 분석 세션에서 발견된 5 패턴:
+- requirements 기록 skip → 추후 이력 추적 불가
+- 기존 자료 검색 skip → 외부 spec 이 `manual/` 에 있는데 다시 다운로드 시도
+- 적용 룰 식별 skip → 거짓 단정 발생 (manual.md v1.6.0 트리거 사례 재현)
+- 사전 승인 판단 skip → 코드 / 큰 변경 미승인 진행
+- 검증 skip → 일괄 정정 (`replace_all`) 후 verbose 결과
+
+본 SOP 는 위 5 패턴 모두 차단. `manual.md` / `iteration_anti_pattern.md` / `github.md` 와 결합 적용.
+
 ## 1.6.2 — 2026-05-08
 
 `manual.md` §3 강화 — 역방향 비약 경고 + DataSheet vs User Manual 분리 추가.
