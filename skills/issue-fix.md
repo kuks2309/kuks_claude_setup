@@ -12,8 +12,8 @@ Full diagnose → propose → implement → verify → record cycle. Works for P
 ### 1. Search Past Issues
 
 Read the issues log (first 200 lines):
-- `docs/issues_fixes/issues_and_fixes.md`
-- `issues_and_fixes/` directory (per-bug files)
+- `docs/issues_and_fixes/issues_and_fixes.md`
+- `docs/issues_and_fixes/` directory (per-bug files)
 
 Grep for keywords from the current error. If a similar past issue exists, reference its root cause as a starting hypothesis.
 
