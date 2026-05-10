@@ -19,7 +19,7 @@ if [ -d "$TARGET_DIR" ]; then
   exit 1
 fi
 
-mkdir -p "$TARGET_DIR/local"
+mkdir -p "$TARGET_DIR/local" "$TARGET_DIR/hooks"
 
 FILES=(
   "README.md"
@@ -32,7 +32,8 @@ FILES=(
   "tech_debt.md"
   "iteration_anti_pattern.md"
   "skill_update.md"
-  "request_handling_sop.md"
+  "user_instruction_handling_sop.md"
+  "claude_md.md"
   "VERSION"
   "CHANGELOG.md"
   "update.sh"
@@ -43,7 +44,16 @@ for f in "${FILES[@]}"; do
   curl -fsSL "$RAW_URL/$f" -o "$TARGET_DIR/$f"
 done
 
-chmod +x "$TARGET_DIR/update.sh" "$TARGET_DIR/audit.sh"
+HOOK_FILES=(
+  "README.md"
+  "session_start_claude_mistake.sh"
+)
+for f in "${HOOK_FILES[@]}"; do
+  echo "[+] Downloading hooks/$f"
+  curl -fsSL "$RAW_URL/hooks/$f" -o "$TARGET_DIR/hooks/$f"
+done
+
+chmod +x "$TARGET_DIR/update.sh" "$TARGET_DIR/audit.sh" "$TARGET_DIR/hooks/session_start_claude_mistake.sh"
 
 cat > "$TARGET_DIR/local/README.md" <<'EOF'
 # 프로젝트별 Override

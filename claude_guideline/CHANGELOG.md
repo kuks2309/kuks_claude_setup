@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.8.3 — 2026-05-11
+
+`claude-mistake/` 학습 closure 인프라 신설 — INDEX.md 카테고리 색인 + closure 규칙 + SessionStart hook + audit.sh 검출 룰. 1.8.2 의 SOP 정정이 다운스트림 패턴을 차단했다면 본 1.8.3 은 같은 세션 내 재발 차단을 시스템화.
+
+### 변경
+
+- `claude-mistake/INDEX.md`: NEW
+  - §메타 패턴 (사전 스캔 없이 생성 모드 진입 / SSOT 무비판 채용 / 카테고리 학습 미적용)
+  - §카테고리 × 사건 매트릭스 (현재 7 카테고리, 3 entry)
+  - §미해결 항목 (open) 추적 표
+  - §운용 규칙 (신규 entry / closure / 카테고리 신설 / 세션 시작 검토)
+  - LLM-HINT 주석 마커 — SessionStart 시 자동 주입 대상 영역 표시
+- `claude-mistake/README.md`:
+  - **NEW §Closure 규칙** — 반영 자산 1개 이상 / TBD 금지 / 카테고리 부착 / owner 명시
+  - §기존 실수 검토 시점: SessionStart hook (자동) + 작업 시작 전 (수동) + 사용자 정정 직후 3 시점으로 확장
+- `claude-mistake/2026-05-07.md`, `2026-05-11.md`: 헤더에 카테고리 뱃지 + 상태 + INDEX 링크 추가 (`> **카테고리**: ... · **상태**: closed (vN.N.N)`).
+- `claude_guideline/audit.sh`:
+  - **NEW [user-instructions-headings]**: `docs/user_instructions/*.md` 안 `### 처리|### 결론|### 산출물` 헤딩 검출 (v1.8.2 SOP 정정의 audit 강제).
+  - **NEW [legacy-request]**: legacy `docs/request/` 폴더 검출 시 `user_instructions/` 로 rename 권고.
+  - **NEW [mistake-order]**: `docs/claude-mistake/YYYY-MM-DD.md` 안 `## ... HH:MM` 헤딩이 시간 역순 (최신 위) 위반 시 검출.
+  - **NEW [mistake-tbd]**: `docs/claude-mistake/*.md` 안 TBD/후보/추후/미정 키워드 검출 (closure 의무 환기).
+  - **NEW [hint]** `docs/claude-mistake/INDEX.md` 부재 권고.
+- `claude_guideline/hooks/`: NEW
+  - `session_start_claude_mistake.sh`: SessionStart 훅 — `claude-mistake/INDEX.md` §메타 패턴 + §미해결 항목 자동 주입.
+  - `README.md`: hook 등록 가이드 (`~/.claude/settings.json` 또는 `<project>/.claude/settings.json`).
+- `claude_guideline/install.sh`, `update.sh`: hooks/ 디렉토리 생성 + 다운로드 + chmod 추가. FILES 배열에 `claude_md.md` (CLAUDE.md 작성 가이드 SSOT, 172줄) 등록.
+- `claude_guideline/claude_md.md`: SSOT 자산 정식 등록 (이전 untracked 상태에서 install/update 대상으로 승격).
+
+### 트리거
+
+10명 sub-agent + Codex/Gemini 검토에서 도출된 closure 결함:
+- "권고 없이 자동 주입 메커니즘 부재" (Methodology, Analyst, UX, Architect 4개 합의)
+- "카테고리/인덱스 부재로 100건 누적 시 grep 의존" (Analyst, UX, Architect 3개 합의)
+- 근본 원인 (A) "트리거 부재" 가설 채택 (Codex, Gemini, Tracer 모두 합의)
+
+본 1.8.3 은 (A) 트리거 부재 가설에 대한 직접 처방: SessionStart hook 으로 INDEX top-N 자동 주입 + audit.sh 로 closure 의무 자동 검출.
+
+### 호환성
+
+patch bump (1.8.2 → 1.8.3). 기존 다운스트림은 `bash docs/claude_guideline/update.sh` 로 hooks/ 폴더 + audit.sh 갱신본 자동 다운로드. SessionStart hook 활성화는 사용자가 `~/.claude/settings.json` 에 entry 1줄 추가 (수동).
+
 ## 1.8.2 — 2026-05-11
 
 `user_instruction_handling_sop.md` ↔ `documentation.md` 충돌 정정 — 1.8.1 의 `docs/user_instructions/` 정의 강화("사용자 지시사항 전용") 가 SOP §3 의 형식(`### 처리` / `### 결론·산출물`)과 충돌하여, 다운스트림에서 결과 요약이 `docs/user_instructions/` 에 누적되는 패턴을 양산. 본 패치는 SOP 측 형식 정정으로 충돌 해소.

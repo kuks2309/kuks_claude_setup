@@ -62,30 +62,52 @@ FILES=(
   "tech_debt.md"
   "iteration_anti_pattern.md"
   "skill_update.md"
-  "request_handling_sop.md"
+  "user_instruction_handling_sop.md"
+  "claude_md.md"
   "VERSION"
   "CHANGELOG.md"
   "update.sh"
   "audit.sh"
 )
 
-# 백업
+HOOK_FILES=(
+  "README.md"
+  "session_start_claude_mistake.sh"
+)
+
+# 백업 (hooks/ 포함)
 BACKUP_DIR="$SCRIPT_DIR/.backup-$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$BACKUP_DIR"
+mkdir -p "$BACKUP_DIR/hooks"
 for f in "${FILES[@]}"; do
   if [ -f "$SCRIPT_DIR/$f" ]; then
     cp "$SCRIPT_DIR/$f" "$BACKUP_DIR/$f"
   fi
 done
+for f in "${HOOK_FILES[@]}"; do
+  if [ -f "$SCRIPT_DIR/hooks/$f" ]; then
+    cp "$SCRIPT_DIR/hooks/$f" "$BACKUP_DIR/hooks/$f"
+  fi
+done
+# legacy 파일 백업 (request_handling_sop.md → user_instruction_handling_sop.md rename)
+if [ -f "$SCRIPT_DIR/request_handling_sop.md" ]; then
+  cp "$SCRIPT_DIR/request_handling_sop.md" "$BACKUP_DIR/request_handling_sop.md.legacy"
+  rm "$SCRIPT_DIR/request_handling_sop.md"
+  echo "[i] legacy request_handling_sop.md 제거 (백업 보존). v1.8.2 부터 user_instruction_handling_sop.md."
+fi
 echo "[+] 백업 완료: $BACKUP_DIR"
 
 # 새 파일 다운로드 (local/ 은 건드리지 않음)
+mkdir -p "$SCRIPT_DIR/hooks"
 for f in "${FILES[@]}"; do
   echo "[+] Downloading $f"
   curl -fsSL "$RAW_URL/$f" -o "$SCRIPT_DIR/$f"
 done
+for f in "${HOOK_FILES[@]}"; do
+  echo "[+] Downloading hooks/$f"
+  curl -fsSL "$RAW_URL/hooks/$f" -o "$SCRIPT_DIR/hooks/$f"
+done
 
-chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh"
+chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh" "$SCRIPT_DIR/hooks/session_start_claude_mistake.sh"
 
 echo ""
 echo "[OK] 업데이트 완료: $CURRENT_VERSION -> $UPSTREAM_VERSION"
