@@ -21,13 +21,29 @@ fi
 
 mkdir -p "$TARGET_DIR/local"
 
-FILES=("README.md" "github.md" "coding.md" "workflow.md" "documentation.md" "VERSION" "CHANGELOG.md" "update.sh")
+FILES=(
+  "README.md"
+  "github.md"
+  "coding.md"
+  "workflow.md"
+  "documentation.md"
+  "manual.md"
+  "ros2.md"
+  "tech_debt.md"
+  "iteration_anti_pattern.md"
+  "skill_update.md"
+  "request_handling_sop.md"
+  "VERSION"
+  "CHANGELOG.md"
+  "update.sh"
+  "audit.sh"
+)
 for f in "${FILES[@]}"; do
   echo "[+] Downloading $f"
   curl -fsSL "$RAW_URL/$f" -o "$TARGET_DIR/$f"
 done
 
-chmod +x "$TARGET_DIR/update.sh"
+chmod +x "$TARGET_DIR/update.sh" "$TARGET_DIR/audit.sh"
 
 cat > "$TARGET_DIR/local/README.md" <<'EOF'
 # 프로젝트별 Override
@@ -46,3 +62,4 @@ echo "  1. CLAUDE.md 의 '문서 작업 규칙' 섹션에 다음 링크를 추�
 echo "       - 진입점 → docs/claude_guideline/README.md"
 echo "  2. 또는 templates/CLAUDE.md.template 을 참고해 새 CLAUDE.md 작성"
 echo "  3. 업데이트: bash $TARGET_DIR/update.sh"
+echo "  4. docs/ 구조 점검(dry-run): bash $TARGET_DIR/audit.sh"

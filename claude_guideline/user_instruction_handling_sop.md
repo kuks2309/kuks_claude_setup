@@ -6,6 +6,30 @@
 
 ---
 
+## 0. 본 SOP 의 목적 — 의도 부채(Intent Debt) 방지
+
+소프트웨어 부채는 세 층위로 나뉘며, 회복 가능성이 다르다:
+
+| 부채 | 회복 가능성 | 근거 |
+|------|-----------|------|
+| 기술 부채 | 가능 | 코드가 남아있어 리팩토링 가능 |
+| 인지 부채 | 가능 | 지식은 외부 소스로 재학습 가능 |
+| **의도 부채** | **불가능** | 사용자 의도가 망실되면 추측 외 복원 수단 없음 |
+
+**의도 부채가 세 부채 중 가장 심각**하며, **사용자 지시의 기록 부재에서 발생**한다. 본 SOP 의 핵심 목적은 사용자 지시사항을 `docs/user_instructions/user_instructions.md` 에 원문 기록하여 **의도 부채를 0 으로 유지**하는 것.
+
+**Step 2 (지시 도착 즉시 기록) + Step 8 (결론·산출물 갱신)** 이 본 SOP 의 중심축이며, 나머지 step (명확화·자료 검색·룰 식별·승인·실행·검증·보고) 은 이 기록이 정확·완결되도록 보조하는 절차다.
+
+기록이 없을 때 발생하는 의도 부채의 증식 경로:
+- 사용자 의도가 Claude 의 추측으로 대체되어 사실로 굳어짐
+- 후속 작업이 잘못된 의도 위에 누적 → 회수 비용 기하급수 증가
+- context window 압축 / 세션 종료 후 원문 망실 → 정정 불가능한 왜곡
+- 다음 세션의 Claude 가 무엇을 이어받았는지 모름 → 위임 불가
+
+→ **결과·산출물·분석은 본 파일이 아니라 [worklog/](../../docs/worklog/), [code_review/](../../docs/code_review/) 등 별도 도메인이 책임진다.** user_instructions.md 는 **지시 원문 보존 전용**.
+
+---
+
 ## 1. 흐름도 (한눈에)
 
 ```
@@ -13,7 +37,7 @@
    ↓
 [Step 1] 지시 명확화                ────→  ✓ 체크: 작업 범위/의도 명확
    ↓
-[Step 2] requests.md 기록        ────→  ✓ 체크: 시간 역순 추가, grep 확인
+[Step 2] user_instructions.md 기록        ────→  ✓ 체크: 시간 역순 추가, grep 확인
    ↓
 [Step 3] 기존 자료 검색 (5종)        ────→  ✓ 체크: 중복/과거 실수 인지
    ↓
@@ -25,7 +49,7 @@
    ↓
 [Step 7] 검증 (manual.md §9)         ────→  ✓ 체크: 거짓 단정 / 미인용 / 정정 잔존 0
    ↓
-[Step 8] requests.md 결론 갱신    ────→  ✓ 체크: 동일 항목 안에 추가
+[Step 8] worklog 결과 기록         ────→  ✓ 체크: user_instructions.md 외 worklog/분야별 폴더에 기록
    ↓
 [Step 9] 1-2줄 결과 보고             ────→  ✓ 체크: 보고 완료
    ↓
@@ -49,33 +73,30 @@
 
 ---
 
-## 3. Step 2 — requests.md 기록
+## 3. Step 2 — `docs/user_instructions/user_instructions.md` 기록 (사용자 원문만)
 
-본 프로젝트 루트의 `docs/request/requests.md` (또는 동등 경로 — 프로젝트별 [`local/`](local/) override 가능).
+본 프로젝트 루트의 `docs/user_instructions/user_instructions.md` (또는 동등 경로 — 프로젝트별 [`local/`](local/) override 가능).
 
-기록 형식:
+`docs/user_instructions/` 의 정의([documentation.md](documentation.md) §docs/ 표준 폴더): **사용자가 터미널에 입력한 지시사항의 시간 누적 기록 전용**. 처리 계획·결과 요약·산출물 목록은 본 폴더 금지 — `docs/worklog/` 또는 분야별 폴더(`code_review/`, `analysis/` 등) 책임.
+
+기록 형식 (v1.8.2 정정 — 처리/결론 섹션 제거):
 ```markdown
-## YYYY-MM-DD HH:MM KST — <짧은 제목>
+## YYYY-MM-DD HH:MM (KST) — <짧은 제목>
 
 ### 요청
 > "<사용자 원문 인용>"
-
-### 처리
-- (현재 단계에서 알고 있는 처리 계획 초안)
-
-### 결론 / 산출물
-- (Step 8 에서 갱신)
 
 ---
 ```
 
 **룰**:
 - KST 시각, 시간 역순 (최신 위)
+- 사용자 원문만 인용 (요약·해석 금지)
 - 항목 추가 즉시 (작업 완료 후 일괄 X)
 - 동일 요구사항 단순 재확인은 생략 가능
 - 비밀번호 / NDA 정보는 마스킹
 
-**✓ 체크**: 항목 추가 완료. `grep "^## " docs/request/requests.md | head -3` 로 시간 역순 확인.
+**✓ 체크**: 항목 추가 완료. `grep "^## " docs/user_instructions/user_instructions.md | head -3` 로 시간 역순 확인. 본 entry 안 `### 처리` / `### 결론` / `### 산출물` 헤딩 부재 확인 (`grep -E "^### (처리|결론|산출물)" docs/user_instructions/user_instructions.md` → 출력 없어야 함).
 
 ---
 
@@ -152,13 +173,42 @@
 
 ---
 
-## 9. Step 8 — requests.md 결론 / 산출물 갱신
+## 9. Step 8 — `docs/worklog/` 결과·산출물 기록 (v1.8.2 정정)
 
-- Step 2 와 **같은 항목 안** "결론 / 산출물" 절 추가/갱신
-- 시간 역순 유지 (순서 변경 X)
-- 산출물 목록: 신규 파일 / 갱신 파일 / commit hash / push 결과 등
+`docs/user_instructions/user_instructions.md` 는 사용자 원문 전용([Step 2](#3-step-2--docsrequestrequestsmd-기록-사용자-원문만)). 처리 결과·결론·산출물은 본 단계에서 **별도 폴더** 에 기록한다.
 
-**✓ 체크**: 갱신 완료. 다른 항목 순서 변경 없음.
+기록 위치 (작업 유형에 따라 택일):
+
+| 작업 유형 | 기록 위치 |
+|----------|----------|
+| 일반 작업 로그 | `docs/worklog/YYYY-MM-DD.md` (시간 누적, 최신 위) |
+| 코드 리뷰 / 평가 | `docs/code_review/<주제>.md` |
+| 분석 / 리서치 | `docs/analysis/<주제>.md` |
+| 리팩토링 계획·결과 | `docs/refactoring/<주제>.md` |
+| 트러블슈팅 | `docs/troubleshooting/<주제>.md` |
+
+기록 형식 (worklog 예시):
+```markdown
+## YYYY-MM-DD HH:MM (KST) — <짧은 제목>
+
+### 트리거 요청
+[user_instructions.md](../user_instructions/user_instructions.md) `YYYY-MM-DD HH:MM` entry 참조.
+
+### 처리
+- (수행한 작업 단계 요약)
+
+### 결론 / 산출물
+- (변경 파일 / commit hash / push 결과 / 후속 TODO)
+
+---
+```
+
+**룰**:
+- `docs/user_instructions/user_instructions.md` 의 동일 항목에 `### 처리` / `### 결론` 섹션을 **추가하지 않는다** (v1.8.2 변경 — 이전 버전에서 동일 항목 안 갱신을 명시했으나 `documentation.md` 의 `user_instructions/` 정의와 충돌하여 정정).
+- worklog 파일이 처음 만들어진다면 `docs/worklog/README.md` 도 함께 만든다 ([documentation.md](documentation.md) §명명 규칙).
+- user_instructions.md 의 entry 와 worklog 의 entry 는 시각·제목으로 매핑되어야 한다 (역방향 grep 가능).
+
+**✓ 체크**: worklog 또는 분야별 폴더에 결과 entry 추가 완료. user_instructions.md 안 `### 처리` / `### 결론` 신규 작성 없음 (`grep -E "^### (처리|결론|산출물)" docs/user_instructions/user_instructions.md` → 출력 없음).
 
 ---
 

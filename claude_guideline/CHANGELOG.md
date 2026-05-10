@@ -1,12 +1,104 @@
 # Changelog
 
-## 1.7.0 — 2026-05-09
+## 1.8.2 — 2026-05-11
 
-`request_handling_sop.md` 신규 — 사용자 지시사항 처리 9 단계 SOP 도입.
+`user_instruction_handling_sop.md` ↔ `documentation.md` 충돌 정정 — 1.8.1 의 `docs/user_instructions/` 정의 강화("사용자 지시사항 전용") 가 SOP §3 의 형식(`### 처리` / `### 결론·산출물`)과 충돌하여, 다운스트림에서 결과 요약이 `docs/user_instructions/` 에 누적되는 패턴을 양산. 본 패치는 SOP 측 형식 정정으로 충돌 해소.
 
 ### 변경
 
-- `claude_guideline/request_handling_sop.md`: NEW
+- `claude_guideline/user_instruction_handling_sop.md`:
+  - **§3 (Step 2)**: `docs/user_instructions/user_instructions.md` 기록 형식에서 `### 처리` / `### 결론 / 산출물` 섹션 제거. 사용자 원문 인용만 남김.
+  - **§9 (Step 8)**: 결과·산출물 기록 책임을 `docs/worklog/` (또는 `code_review/` / `analysis/` / `refactoring/` / `troubleshooting/`) 로 이동. user_instructions.md 와 worklog entry 는 시각·제목으로 매핑.
+  - **§1 흐름도**: Step 8 라벨을 "user_instructions.md 결론 갱신" → "worklog 결과 기록" 으로 갱신.
+  - 신규 ✓ 체크: `grep -E "^### (처리|결론|산출물)" docs/user_instructions/user_instructions.md` → 출력 없어야 함.
+
+### 트리거
+
+`claude-mistake/2026-05-11.md` 05:10 entry — Claude 가 같은 세션 안에서 동일 카테고리 ("결과 요약을 `user_instructions/` 에 넣음") 를 두 번째로 재현. 첫 번째는 `ccg-review-2026-05-10.md` 위치 오류, 두 번째는 `user_instructions.md` 안 `### 처리` / `### 결론` 섹션 작성.
+
+10명 sub-agent 검토 + Codex/Gemini 외부 검토에서 "1.8.1 의 `user_instructions/` 정의와 SOP §3 형식이 충돌" 로 확정.
+
+### 호환성
+
+patch bump (1.8.1 → 1.8.2). 기존 `user_instructions.md` 에 이미 작성된 `### 처리` / `### 결론` 섹션은 본 패치로 자동 제거되지 않음 — `audit.sh` 의 차기 룰(P1)이 검출 후 사용자가 worklog 로 이전.
+
+## 1.8.1 — 2026-05-11
+
+1.8.0 누락 수정 — `claude-mistake/` (SSOT 자산) canonical 등록 + `docs/user_instructions/` 정의 명확화.
+
+### 변경
+
+- `claude_guideline/documentation.md`:
+  - **NEW**: 폴더 명명 규칙에 **SSOT 배포 자산 예외** 추가. `claude_guideline/` (언더바), `claude-mistake/` (하이픈), `superpowers/` 는 SSOT 표기를 그대로 유지(언더바-only 룰의 예외).
+  - **NEW**: docs/ 필수 폴더 표에 `claude-mistake/` 추가. 형식 / 목적(Claude 실수 재발 방지) 명시.
+  - **수정**: `user_instructions/` 정의 명확화 — "**사용자가 터미널에 입력한 지시사항의 시간 누적 기록**"(`user_instruction_handling_sop.md` §3 형식). 결과 요약·리뷰·분석은 여기 금지.
+  - Variant 매핑 표에 `mistake/`, `claude_mistake/`, `claude_mistakes/` → `claude-mistake/` 추가.
+  - Variant 매핑 표에 `user_instructions/` 안 `*review*`/`*report*`/`*summary*`/`*analysis*` 파일 → `code_review/` 또는 `analysis/` 이전 권고 추가.
+- `claude_guideline/audit.sh`:
+  - `FOLDER_VARIANTS` 에 mistake 류 3 종 추가.
+  - **NEW [request-misclass]** 검출: `docs/user_instructions/` 안 비-요청 파일(review/report/summary/analysis 키워드 매칭) 자동 권고.
+  - **NEW [hint]** `docs/claude-mistake/` 부재 시 정보성 권고 (강제 X — 활동 발생 시 생성 권장).
+
+### 트리거
+
+사용자 지적:
+
+> "`docs/request` 는 사용자의 지시사항을 기록하는 것입니다. 사용자가 터미널에 입력하는 지시사항을 정리해서 기록하는 것입니다. … 현재 `ccg-review-2026-05-10.md` 는 결과 요약을 했는데 결과 요약의 목적이 아닙니다."
+
+> "제일 중요한 `claude_mistake` 가 빠졌네요. 이 부분은 매우 중요합니다. 지적사항에 대해서 claude 의 실수를 기록해서 반복 실수를 하지 않도록 하는 것이 목적입니다."
+
+근본 원인:
+
+1. 1.8.0 의 canonical 트리가 `claude_guideline/` 만 인식하고 `claude-mistake/` 등 SSOT 의 다른 자산을 누락. 즉 SSOT 의 책임 분리 분석이 불완전.
+2. `documentation.md` 의 매핑 표가 `user_instructions/` 를 "요구사항 · 요청 사항"으로 모호하게 정의해, 결과물 분류 폴더로 오인되기 쉬웠음. SSOT 결함.
+
+본 1.8.1 은 두 결함을 직접 정정. **이 사건 자체는 `claude-mistake/2026-05-11.md` 항목으로 별도 기록 권장** (Claude 가 SSOT 자산 인벤토리를 사전 점검하지 않은 실수).
+
+## 1.8.0 — 2026-05-11
+
+`documentation.md` 에 docs/ canonical 구조 정의 + `audit.sh` 신규 도입. 46 개 docs/ 폴더 일괄 감사 결과를 SSOT 룰로 코드화.
+
+### 변경
+
+- `claude_guideline/documentation.md`:
+  - **NEW §폴더 명명 규칙(Canonical)**: 폴더는 언더바 `_` 만 허용, 하이픈/공백/한글 폴더명 금지. 단·복수 일관 룰.
+  - **NEW §표준 레이아웃(Canonical Tree)**: repo-root 직속(`manual/`, `api/`) vs `docs/` 책임 분리. `docs/` 필수·옵션 폴더 표.
+  - **NEW §ROS2 워크스페이스 특칙**: 패키지별 `src/<pkg>/docs/code_updates/` 가 디폴트, 워크스페이스 `docs/code_updates/` 는 횡단 변경 한정.
+  - **NEW §Variant → Canonical 매핑**: `code-review`/`code_reivew` → `code_review`, `issues-fixes`/`issues_fixes` → `issues_and_fixes`, `sw_structure`/`sw-architecture` → `architecture`, `stratedgy` → `strategy` 등 audit.sh 자동 적용 대상.
+  - **NEW §변종 차단 룰**: audit.sh 가 검사하는 항목 6 종 명시.
+- `claude_guideline/audit.sh`: NEW
+  - `bash audit.sh [path...]` 또는 `--batch <file>` 로 일괄 점검.
+  - dry-run 전용(파일 이동 없음). variant 폴더 / 단일파일→폴더 승격 / 평탄 .md / 외부 PDF / 한글·공백 폴더명 / 오탈자 / 빈 폴더 / ROS2 패키지 docs 누락 / repo root 필수 파일 누락 검출.
+  - exit 0 항상(audit-only).
+- `claude_guideline/install.sh`:
+  - FILES 배열에 `manual.md`, `ros2.md`, `tech_debt.md`, `iteration_anti_pattern.md`, `skill_update.md`, `user_instruction_handling_sop.md`, `audit.sh` 추가(기존 누락 해소).
+  - 설치 후 안내에 `audit.sh` 사용법 추가.
+- `claude_guideline/update.sh`:
+  - FILES 배열 단일화(install.sh 와 동일). manual.md/ros2.md/iteration_anti_pattern.md/skill_update.md/user_instruction_handling_sop.md/audit.sh 백업 + 다운로드 포함.
+
+### 트리거
+
+`/team 20` 으로 이 컴퓨터의 46 개 docs/ 폴더(직속 하위에 docs/ 가 있는 모든 사용자 프로젝트) 일괄 감사 결과:
+
+- 공통 폴더명 변종 다수(`code-review`/`code_reivew`/`issues-fixes`/`issues_fixes`/`sw-architecture`/`stratedgy`)
+- 평탄 `*_code_updates.md` 20+ 개(T-Robot_nav_ros2_ws)
+- docs/ 안 외부 벤더 PDF(TM_Robot/Hailo/parking_robot) — root `manual/` 분리 필요
+- 한글 폴더명·공백 포함 폴더명(`GLIM-slam only/`, `학습_및_DFC_가이드` 류)
+- ROS2 패키지에 docs/ 누락 다수
+
+세부 감사 결과: `Project/claude_code/docs/projects_analysis/README.md` 및 개별 46 보고서.
+
+### 호환성
+
+minor bump (1.7.0 → 1.8.0). 기존 설치 repo 는 `bash docs/claude_guideline/update.sh` 로 새 파일(`audit.sh`, `manual.md` 등) 다운로드 가능. 기존 폴더 구조 강제 마이그레이션 없음(`audit.sh` 는 dry-run 권고만).
+
+## 1.7.0 — 2026-05-09
+
+`user_instruction_handling_sop.md` 신규 — 사용자 지시사항 처리 9 단계 SOP 도입.
+
+### 변경
+
+- `claude_guideline/user_instruction_handling_sop.md`: NEW
   - 9 단계 (지시 명확화 → requirements 기록 → 기존 자료 검색 → SSOT 룰 식별 → 사전 승인 → 실행 → 검증 → 결론 갱신 → 결과 보고)
   - 각 단계 ✓ 체크 강제 (skip 시 거짓 단정 / 중복 작업 / 미승인 변경 위험)
   - SOP 위반 시 영향 사례 (Step 2/3/4/5/7 skip 패턴, 익명화)

@@ -46,7 +46,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/kuks2309/kuks_claude_setup/ma
 
 | 영역 | 파일 |
 | :--- | :--- |
-| 사용자 지시 처리 9단계 SOP | [`claude_guideline/request_handling_sop.md`](claude_guideline/request_handling_sop.md) |
+| 사용자 지시 처리 9단계 SOP | [`claude_guideline/user_instruction_handling_sop.md`](claude_guideline/user_instruction_handling_sop.md) |
 | 코드 작업 규칙 | [`claude_guideline/coding.md`](claude_guideline/coding.md) |
 | GitHub 워크플로 | [`claude_guideline/github.md`](claude_guideline/github.md) |
 | 매뉴얼/데이터시트 인용·검증 | [`claude_guideline/manual.md`](claude_guideline/manual.md) |
