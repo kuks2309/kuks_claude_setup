@@ -13,7 +13,7 @@
    ↓
 [Step 1] 지시 명확화                ────→  ✓ 체크: 작업 범위/의도 명확
    ↓
-[Step 2] requirements.md 기록        ────→  ✓ 체크: 시간 역순 추가, grep 확인
+[Step 2] requests.md 기록        ────→  ✓ 체크: 시간 역순 추가, grep 확인
    ↓
 [Step 3] 기존 자료 검색 (5종)        ────→  ✓ 체크: 중복/과거 실수 인지
    ↓
@@ -25,7 +25,7 @@
    ↓
 [Step 7] 검증 (manual.md §9)         ────→  ✓ 체크: 거짓 단정 / 미인용 / 정정 잔존 0
    ↓
-[Step 8] requirements.md 결론 갱신    ────→  ✓ 체크: 동일 항목 안에 추가
+[Step 8] requests.md 결론 갱신    ────→  ✓ 체크: 동일 항목 안에 추가
    ↓
 [Step 9] 1-2줄 결과 보고             ────→  ✓ 체크: 보고 완료
    ↓
@@ -49,9 +49,9 @@
 
 ---
 
-## 3. Step 2 — requirements.md 기록
+## 3. Step 2 — requests.md 기록
 
-본 프로젝트 루트의 `docs/request/requirements.md` (또는 동등 경로 — 프로젝트별 [`local/`](local/) override 가능).
+본 프로젝트 루트의 `docs/request/requests.md` (또는 동등 경로 — 프로젝트별 [`local/`](local/) override 가능).
 
 기록 형식:
 ```markdown
@@ -75,7 +75,7 @@
 - 동일 요구사항 단순 재확인은 생략 가능
 - 비밀번호 / NDA 정보는 마스킹
 
-**✓ 체크**: 항목 추가 완료. `grep "^## " docs/request/requirements.md | head -3` 로 시간 역순 확인.
+**✓ 체크**: 항목 추가 완료. `grep "^## " docs/request/requests.md | head -3` 로 시간 역순 확인.
 
 ---
 
@@ -152,7 +152,7 @@
 
 ---
 
-## 9. Step 8 — requirements.md 결론 / 산출물 갱신
+## 9. Step 8 — requests.md 결론 / 산출물 갱신
 
 - Step 2 와 **같은 항목 안** "결론 / 산출물" 절 추가/갱신
 - 시간 역순 유지 (순서 변경 X)
