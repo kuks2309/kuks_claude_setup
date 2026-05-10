@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.8.4 — 2026-05-11
+
+`kuks_claude_setup/claude-mistake/` 책임 경계 정정 — v1.8.2 / v1.8.3 에서 SSOT 본판에 잘못 push 한 사건 entry 제거 + README 명시화.
+
+### 변경
+
+- `claude-mistake/2026-05-07.md` 제거 (`git rm`) — 본 파일은 본 SSOT 폴더가 아닌 사건 발생 프로젝트의 `docs/claude-mistake/` 에 있어야 함.
+- `claude-mistake/2026-05-11.md` 제거 (`git rm`) — 본 워크스페이스 (claude_code) 사건이므로 `claude_code/docs/claude-mistake/2026-05-11.md` (이미 존재) 가 정상 위치.
+- `claude-mistake/INDEX.md` 제거 (`git rm`) — 카테고리 인덱스 운용은 다운스트림 책임. 본 SSOT 에는 형식 정의만.
+- `claude-mistake/README.md`:
+  - **NEW §책임 경계** — 본 SSOT 폴더에는 README 만, 사건 entry / INDEX 는 다운스트림 `docs/claude-mistake/` 에만 작성. 본 SSOT 에 사건을 두면 다른 프로젝트에 무관한 사건이 노출되는 책임 경계 침범.
+  - §Closure 규칙 / §검토 시점: INDEX.md 참조를 다운스트림 `docs/claude-mistake/INDEX.md` 로 명시.
+  - §설치 방법 마지막 줄에 "SSOT 에는 본 README 만" 강조.
+
+### 트리거
+
+사용자 지적 (2026-05-11 06:10 KST):
+
+> "일반화 폴더에 이 프로젝트의 내용을 기록하는 특별한 이유가 있는지?"
+> "폴더 /home/amap/Project/claude_code/kuks_claude_setup/claude-mistake 가 일반화 폴더라고 1000번 더 이야기 할까"
+
+근본 원인: v1.8.2 / v1.8.3 patch 시 본 워크스페이스 사건을 SSOT 본판에 commit (`1c34741`, `be47c6c`). 또한 v1.8.2 이전부터 있던 `2026-05-07.md` (`73fc92b`) 도 같은 책임 경계 위반인데 정정 누락. README 가 묵시적으로만 다운스트림 위치를 가리켰을 뿐 명시적이지 않아, 운영자(Claude/이전 작업자) 가 SSOT 에 사건을 push 하는 패턴이 반복됨.
+
+### 호환성
+
+patch bump (1.8.3 → 1.8.4). 다운스트림 영향:
+- 다운스트림이 SSOT 의 `claude-mistake/2026-05-*.md` 를 참조하지 않았다면 영향 없음.
+- 참조했다면 자체 `docs/claude-mistake/` 의 사건 기록을 사용하도록 수정 필요 (애초에 다른 프로젝트의 사건이라 참조해서는 안 되는 데이터).
+
 ## 1.8.3 — 2026-05-11
 
 `claude-mistake/` 학습 closure 인프라 신설 — INDEX.md 카테고리 색인 + closure 규칙 + SessionStart hook + audit.sh 검출 룰. 1.8.2 의 SOP 정정이 다운스트림 패턴을 차단했다면 본 1.8.3 은 같은 세션 내 재발 차단을 시스템화.
