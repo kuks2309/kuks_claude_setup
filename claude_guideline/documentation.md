@@ -45,6 +45,15 @@
 - 본문: 한국어
 - 도메인 식별자(토픽 / 노드 / 명령 / 레지스터 / 핀맵 / 명령어 / 경로 / 코드 블록): 원문 유지
 
+## 약자 (Acronym) 병기
+
+- 약자는 **각 문서 안 첫 등장 시 풀네임 병기 필수**.
+  - 형식 예: `SOP (Standard Operating Procedure / 표준 운영 절차)` 또는 `SSOT (단일 근원)`
+  - 영문 풀네임 + 한국어 의역 둘 다 권장. 한국어 단독도 허용.
+- 두 번째 이후 등장은 약자만 사용 OK.
+- 자동 검증: [audit.sh](audit.sh) `[acronym-no-expansion]` 룰 — `claude_guideline/` 자산 + 도입 프로젝트 `docs/` 의 `.md` 파일에서 알려진 약자 사전과 비교, 첫 등장 풀네임 미병기 시 경고.
+- 약자 사전 (본 프로젝트 도메인): SOP (Standard Operating Procedure), SSOT (Single Source of Truth), MCP (Model Context Protocol), KST (Korea Standard Time), TBD (To Be Determined), PR (Pull Request), CI (Continuous Integration), API (Application Programming Interface), LLM (Large Language Model), ECC (Everything Claude Code), AP-N (Anti-Pattern), D-N (Dimension).
+
 ## 인용·근거
 
 - 외부 매뉴얼 인용 시 "매뉴얼명, 페이지/섹션" 명시 ([manual.md](manual.md))

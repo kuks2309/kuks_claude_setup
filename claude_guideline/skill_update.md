@@ -1,6 +1,6 @@
 # 스킬 등록 규칙
 
-본 워크스페이스에서 신규 스킬 / 자동화 자산을 만들거나 기존 자산을 보강하면, SSOT 스킬 레포 [`kuks_claude_setup`](https://github.com/kuks2309/kuks_claude_setup) 에 등록해 다른 프로젝트가 재사용할 수 있게 한다. 본 규칙은 그 절차의 단일 근원.
+본 워크스페이스에서 신규 스킬 / 자동화 자산을 만들거나 기존 자산을 보강하면, SSOT (Single Source of Truth / 단일 근원) 스킬 레포 [`kuks_claude_setup`](https://github.com/kuks2309/kuks_claude_setup) 에 등록해 다른 프로젝트가 재사용할 수 있게 한다. 본 규칙은 그 절차의 단일 근원.
 
 ## 적용 대상 ("스킬" 의 범위)
 

@@ -6,7 +6,7 @@ Git / GitHub 작업 규칙의 단일 근원.
 
 사용자가 "기록" 또는 "기록해" 등의 지시를 내리면 다음 4단계를 모두 수행한다.
 
-1. 관련 docs (`docs/user_instructions/user_instructions.md`, `docs/issues_and_fixes/issues_and_fixes.md`) 에 SSOT 형식대로 entry 추가
+1. 관련 docs (`docs/user_instructions/user_instructions.md`, `docs/issues_and_fixes/issues_and_fixes.md`) 에 SSOT (Single Source of Truth / 단일 근원) 형식대로 entry 추가
 2. 변경 파일 staging (`git add <명시 파일>`)
 3. 커밋 생성 (`git commit`, 작업 단위별 1 커밋)
 4. push (`git push` 현재 추적 분기로)

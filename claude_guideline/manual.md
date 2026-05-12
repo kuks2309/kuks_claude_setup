@@ -37,7 +37,7 @@ datasheet 를 읽고 운영점을 해석할 때 다음 비약을 **금지**:
 
 - ❌ "TYP = 권장값" 비약: datasheet 의 TYP 컬럼은 **typical 측정 기준점** (대표 silicon, 25°C, 표준 조건). datasheet 가 명시적으로 "recommended operating point" 라 표기하지 않은 한 "TYP = 권장 운영값" 으로 단정 금지.
 - ❌ "Min/Max 안에 들어오면 무조건 OK" 비약: Min~Max 는 spec 보장 범위. 단 측정 조건 (postcalibration, ENRMS, ripple, 온도, 전압, 부하 등 footnote) 이 충족돼야 함. footnote 미인용 시 ⓦ 격하.
-- ❌ SDK 매크로 수정값 = datasheet TYP 와 일치 = "합리적 설정" 비약: 매크로 수정의 의도와 datasheet TYP 일치는 **우연** 일 수 있음. "매크로 수정자가 datasheet 보고 의도적으로 TYP 정렬" 단정은 commit 메시지 / PR 설명 등 별도 증거 필요.
+- ❌ SDK 매크로 수정값 = datasheet TYP 와 일치 = "합리적 설정" 비약: 매크로 수정의 의도와 datasheet TYP 일치는 **우연** 일 수 있음. "매크로 수정자가 datasheet 보고 의도적으로 TYP 정렬" 단정은 commit 메시지 / PR (Pull Request) 설명 등 별도 증거 필요.
 
 ### 3.2 datasheet vs User Manual / Family Manual 분리
 
@@ -156,7 +156,7 @@ datasheet 를 읽고 운영점을 해석할 때 다음 비약을 **금지**:
 
 ## 13. 변경 절차
 
-본 룰은 SSOT 이므로 변경 시 **사용자 승인 필수**. 변경 후:
+본 룰은 SSOT (Single Source of Truth / 단일 근원) 이므로 변경 시 **사용자 승인 필수**. 변경 후:
 1. CLAUDE.md §0 표 갱신 확인
 2. README.md 표 / 원본 미반영 목록 동기화 확인
 3. Skill 파일 (`skills/manual-first.md`) 동기화

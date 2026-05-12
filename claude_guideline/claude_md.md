@@ -59,7 +59,7 @@ CLAUDE.md 는 Claude Code 가 프로젝트 작업 시 *자동 로드* 하는 메
 
 - 진입점 → docs/claude_guideline/README.md
   - CLAUDE.md 작성 가이드 → claude_md.md
-  - 사용자 지시사항 처리 SOP → user_instruction_handling_sop.md
+  - 사용자 지시사항 처리 SOP (Standard Operating Procedure / 표준 운영 절차) → user_instruction_handling_sop.md
   - 지시 작성 가이드 → request_giving.md
   - 작업 절차 체크리스트 → workflow.md
   - 코드 작업 규칙 → coding.md

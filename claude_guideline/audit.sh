@@ -58,6 +58,21 @@ TYPO_DICT=(
   "performace:performance"
 )
 
+# 알려진 약자 사전 (Acronym → 풀네임) — documentation.md §약자 병기
+# 형식: "ACRONYM:풀네임"
+ACRONYM_DICT=(
+  "SOP:Standard Operating Procedure / 표준 운영 절차"
+  "SSOT:Single Source of Truth / 단일 근원"
+  "MCP:Model Context Protocol"
+  "KST:Korea Standard Time / 한국 표준시"
+  "TBD:To Be Determined / 미정"
+  "API:Application Programming Interface"
+  "LLM:Large Language Model"
+  "PR:Pull Request"
+  "CI:Continuous Integration"
+  "ECC:Everything Claude Code"
+)
+
 # Counters
 declare -i N_PROJ=0 N_ISSUE=0
 
@@ -255,6 +270,28 @@ audit_project() {
   if [ -d "$proj/manual" ] && [ ! -f "$proj/manual/SOURCES.md" ]; then
     echo "${C_YEL}  [manual]${C_RST} manual/ 있으나 ${C_GRN}manual/SOURCES.md${C_RST} 부재"
     N_ISSUE+=1
+  fi
+
+  # 11) 약자 미병기 검출 (documentation.md §약자 병기) — hint-level
+  # ACRONYM_DICT 의 각 약자가 .md 파일에 첫 등장할 때 풀네임 병기 여부 점검.
+  # 병기 인식 패턴: 같은 라인에 `ACRONYM (` 형식이 있으면 OK 로 간주.
+  if [ -d "$docs" ]; then
+    while IFS= read -r f; do
+      [ -z "$f" ] && continue
+      for entry in "${ACRONYM_DICT[@]}"; do
+        local acr="${entry%%:*}"
+        local full="${entry#*:}"
+        local first_ln
+        first_ln=$(grep -nE "\\b${acr}\\b" "$f" 2>/dev/null | head -1 | cut -d: -f1)
+        [ -z "$first_ln" ] && continue
+        local first_line
+        first_line=$(sed -n "${first_ln}p" "$f")
+        # 병기 인식: 정방향 'ACR (...' 또는 역방향 '( ACR )'
+        if ! echo "$first_line" | grep -qE "(\\b${acr}\\b[[:space:]]*\\()|(\\([[:space:]]*${acr}\\b)"; then
+          echo "${C_DIM}  [acronym-no-expansion]${C_RST} $f:${first_ln} — '${acr}' 첫 등장 풀네임 미병기 (예: ${C_GRN}${acr} (${full})${C_RST})"
+        fi
+      done
+    done < <(find "$docs" -type f -name '*.md' 2>/dev/null)
   fi
 
   if [ "$found_variant" -eq 0 ] && [ "$N_ISSUE" -eq 0 ]; then

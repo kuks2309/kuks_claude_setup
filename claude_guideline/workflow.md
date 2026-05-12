@@ -4,7 +4,7 @@
 
 ## 작업 시작 전 (7 항목)
 
-- [ ] 워크스페이스 루트 `CLAUDE.md` 와 관련 SSOT 파일을 확인했는가?
+- [ ] 워크스페이스 루트 `CLAUDE.md` 와 관련 SSOT (Single Source of Truth / 단일 근원) 파일을 확인했는가?
 - [ ] 작업 영역에 모듈 CLAUDE.md 가 있다면 먼저 읽었는가?
 - [ ] 관련 이론·매뉴얼·기존 코드를 조사했는가?
 - [ ] **동일 영역의 기존 실수 / 이슈 기록을 빠르게 훑었는가?** (`docs/claude-mistake/`, `docs/issues_and_fixes/` 등 — 도메인 폴더 구성에 따름)
