@@ -109,6 +109,42 @@ done
 
 chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh" "$SCRIPT_DIR/hooks/session_start_claude_mistake.sh"
 
+# SOP 가 의존하는 표준 폴더 보강 (없을 때만 생성, 기존 README 는 덮어쓰지 않음)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+mkdir -p "$PROJECT_ROOT/docs/claude-mistake" "$PROJECT_ROOT/docs/user_instructions" "$PROJECT_ROOT/docs/worklog"
+
+if [ ! -f "$PROJECT_ROOT/docs/claude-mistake/README.md" ]; then
+  echo "[+] Downloading claude-mistake/README.md (신규)"
+  curl -fsSL "https://raw.githubusercontent.com/kuks2309/kuks_claude_setup/master/claude-mistake/README.md" \
+    -o "$PROJECT_ROOT/docs/claude-mistake/README.md"
+fi
+
+if [ ! -f "$PROJECT_ROOT/docs/user_instructions/README.md" ]; then
+  cat > "$PROJECT_ROOT/docs/user_instructions/README.md" <<'EOF'
+# 사용자 지시 기록 (user_instructions)
+
+사용자가 터미널에 입력한 지시사항의 시간 누적 기록 전용. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §3.
+
+- 사용자 원문 인용만 (요약·해석 금지)
+- 시간 역순 (최신 위), KST 시각
+- 처리 결과·산출물은 본 폴더 금지 → [worklog/](../worklog/) 또는 `code_review/` / `analysis/` 책임
+
+실제 사용자 지시는 `user_instructions.md` 에 누적.
+EOF
+fi
+
+if [ ! -f "$PROJECT_ROOT/docs/worklog/README.md" ]; then
+  cat > "$PROJECT_ROOT/docs/worklog/README.md" <<'EOF'
+# 작업 기록 (worklog)
+
+사용자 지시에 대한 처리 결과·결론·산출물의 시간 누적 기록. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §9 (Step 8).
+
+- 파일 단위: `YYYY-MM-DD.md` (시간 역순)
+- 매 entry: `### 트리거 요청` ([user_instructions.md](../user_instructions/user_instructions.md) 참조) + `### 처리` + `### 결론 / 산출물`
+- 코드 리뷰 / 분석 / 리팩토링은 본 폴더가 아닌 `code_review/` / `analysis/` / `refactoring/` 책임
+EOF
+fi
+
 echo ""
 echo "[OK] 업데이트 완료: $CURRENT_VERSION -> $UPSTREAM_VERSION"
 echo "[i] local/ 폴더는 그대로 유지됩니다."

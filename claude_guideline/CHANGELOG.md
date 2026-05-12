@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.8.5 — 2026-05-11
+
+SOP 가 의존하는 표준 폴더(`docs/claude-mistake/`, `docs/user_instructions/`, `docs/worklog/`)를 install/update 가 자동 생성하도록 정정. 이전까지는 `claude_guideline/` 만 자동 설치되고 나머지 3개 폴더는 사용자가 수동 mkdir 해야 했음 — SOP 흐름에 폴더 부재 시 어떻게 만드는지 절차 누락.
+
+### 변경
+
+- `claude_guideline/install.sh`:
+  - **NEW**: `mkdir -p docs/claude-mistake docs/user_instructions docs/worklog` 자동 실행.
+  - **NEW**: 각 폴더에 README.md 생성 — claude-mistake 는 SSOT 원격에서 다운로드, user_instructions / worklog 는 install.sh heredoc 으로 stub 생성 (역할·형식·SSOT 링크 명시).
+  - 기존 파일이 있으면 덮어쓰지 않음 (`if [ ! -f ... ]` 가드).
+- `claude_guideline/update.sh`:
+  - 동일 mkdir + README 보강 — 기존 다운스트림이 update.sh 실행 시 누락된 폴더 자동 보충.
+  - 기존 README 는 덮어쓰지 않음.
+
+### 트리거
+
+사용자 지적 (2026-05-11):
+
+> "현재 mistake 부분에서 프로젝트 처음 설치할때 폴더를 만들게 되어 있나요?"
+> "폴더 /home/amap/Project/claude_code/docs/user_instructions 도 처음 프로젝트에 적용할때 폴더 설치하라는 지시가 없는것 같은데요."
+
+근본 원인: v1.8.2 / v1.8.3 의 SOP 정정이 `worklog/` 책임을 새로 부여하고 `user_instructions.md` 기록 절차를 강화했으나, install.sh 가 `claude_guideline/` 만 다루도록 설계되어 신규 프로젝트가 SOP 를 따르려면 사용자가 별도로 폴더를 만들어야 하는 마찰 존재. SOP 가 의존하는 모든 폴더는 install 단계에서 자동 보장되어야 함.
+
+### 호환성
+
+patch bump (1.8.4 → 1.8.5). 기존 다운스트림은 `bash docs/claude_guideline/update.sh` 실행 시 누락된 폴더 자동 보충. 이미 폴더와 README 가 있다면 그대로 유지.
+
 ## 1.8.4 — 2026-05-11
 
 `kuks_claude_setup/claude-mistake/` 책임 경계 정정 — v1.8.2 / v1.8.3 에서 SSOT 본판에 잘못 push 한 사건 entry 제거 + README 명시화.
