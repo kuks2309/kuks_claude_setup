@@ -273,12 +273,12 @@ audit_project() {
   fi
 
   # 11) 약자 미병기 검출 (documentation.md §약자 병기) — hint-level
-  # ACRONYM_DICT 의 각 약자가 .md 파일에 첫 등장할 때 풀네임 병기 여부 점검.
-  # 병기 인식 패턴: 같은 라인에 `ACRONYM (` 또는 `(ACRONYM` 형식이 있으면 OK.
+  # 검증: 첫 등장 줄에 ACR + 풀네임 키워드 (영문/한국어) 동시 존재 여부.
+  # 단순 괄호 매칭으로는 false-positive (예: "SSOT (repo_name)") 발생 — 풀네임 키워드 검증 필수.
   # 화이트리스트:
-  #   - CHANGELOG.md: 역사적 entry 보존 (소급 병기 = history 왜곡)
+  #   - CHANGELOG.md: 역사적 entry 보존
   #   - user_instructions.md: 사용자 원문 quote 보존
-  #   - user_instruction_analysis.md: 폐기/통합 결정 진행 중 (별도 세션 작업)
+  #   - user_instruction_analysis.md: 폐기/통합 결정 진행 중
   if [ -d "$docs" ]; then
     while IFS= read -r f; do
       [ -z "$f" ] && continue
@@ -294,9 +294,22 @@ audit_project() {
         [ -z "$first_ln" ] && continue
         local first_line
         first_line=$(sed -n "${first_ln}p" "$f")
-        # 병기 인식: 정방향 'ACR (...' 또는 역방향 '( ACR )'
-        if ! echo "$first_line" | grep -qE "(\\b${acr}\\b[[:space:]]*\\()|(\\([[:space:]]*${acr}\\b)"; then
-          echo "${C_DIM}  [acronym-no-expansion]${C_RST} $f:${first_ln} — '${acr}' 첫 등장 풀네임 미병기 (예: ${C_GRN}${acr} (${full})${C_RST})"
+        # 풀네임 키워드 split (" / " 구분자) + 트림
+        local matched=0
+        local saved_ifs="$IFS"
+        IFS='/' read -ra parts <<< "$full"
+        IFS="$saved_ifs"
+        for p in "${parts[@]}"; do
+          # 앞뒤 공백 제거
+          p="${p# }"; p="${p% }"; p="${p# }"; p="${p% }"
+          [ -z "$p" ] && continue
+          if echo "$first_line" | grep -qF "$p"; then
+            matched=1
+            break
+          fi
+        done
+        if [ "$matched" -eq 0 ]; then
+          echo "${C_DIM}  [acronym-no-expansion]${C_RST} $f:${first_ln} — '${acr}' 첫 등장 풀네임 키워드 미발견 (예: ${C_GRN}${acr} (${full})${C_RST})"
         fi
       done
     done < <(find "$docs" -type f -name '*.md' 2>/dev/null)

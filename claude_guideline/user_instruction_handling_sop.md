@@ -1,4 +1,4 @@
-# 사용자 지시사항 처리 표준 절차 (SOP)
+# 사용자 지시사항 처리 표준 운영 절차 (SOP / Standard Operating Procedure)
 
 매번 사용자 지시가 도착하면 다음 9 단계를 **순차 실행** 하고 각 단계마다 **✓ 체크** 후 다음 단계로 진행한다. 단계 skip 또는 ✓ 체크 누락은 거짓 단정 / 중복 작업 / 미승인 변경 등의 위험을 초래한다 (실제 사례 §11 참조).
 
@@ -79,7 +79,7 @@
 
 `docs/user_instructions/` 의 정의([documentation.md](documentation.md) §docs/ 표준 폴더): **사용자가 터미널에 입력한 지시사항의 시간 누적 기록 전용**. 처리 계획·결과 요약·산출물 목록은 본 폴더 금지 — `docs/worklog/` 또는 분야별 폴더(`code_review/`, `analysis/` 등) 책임.
 
-기록 형식 (v1.8.2 정정 — 처리/결론 섹션 제거):
+기록 형식 (v1.8.2 정정 — 처리/결론 섹션 제거, 시각 KST = Korea Standard Time / 한국 표준시):
 ```markdown
 ## YYYY-MM-DD HH:MM (KST) — <짧은 제목>
 

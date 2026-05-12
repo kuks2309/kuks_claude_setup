@@ -1,4 +1,4 @@
-# CLAUDE.md 작성 가이드 (SSOT)
+# CLAUDE.md 작성 가이드 (SSOT / Single Source of Truth / 단일 근원)
 
 본 SSOT 는 CLAUDE.md 파일의 정의·구조·작성 절차·검증·변종 차단 룰을 정의한다.
 

@@ -18,7 +18,7 @@
 
 ## 시각/날짜 형식
 
-- 형식: `YYYY-MM-DD HH:MM (KST)` 또는 `YYYY-MM-DD`
+- 형식: `YYYY-MM-DD HH:MM (KST)` 또는 `YYYY-MM-DD` — KST = Korea Standard Time (한국 표준시)
 - 시각 확인: 시스템 시간 기준 (`date "+%Y-%m-%d %H:%M (%Z)"`)
 - 24 시간제 사용
 
