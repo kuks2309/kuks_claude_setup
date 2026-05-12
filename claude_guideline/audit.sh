@@ -274,10 +274,18 @@ audit_project() {
 
   # 11) 약자 미병기 검출 (documentation.md §약자 병기) — hint-level
   # ACRONYM_DICT 의 각 약자가 .md 파일에 첫 등장할 때 풀네임 병기 여부 점검.
-  # 병기 인식 패턴: 같은 라인에 `ACRONYM (` 형식이 있으면 OK 로 간주.
+  # 병기 인식 패턴: 같은 라인에 `ACRONYM (` 또는 `(ACRONYM` 형식이 있으면 OK.
+  # 화이트리스트:
+  #   - CHANGELOG.md: 역사적 entry 보존 (소급 병기 = history 왜곡)
+  #   - user_instructions.md: 사용자 원문 quote 보존
+  #   - user_instruction_analysis.md: 폐기/통합 결정 진행 중 (별도 세션 작업)
   if [ -d "$docs" ]; then
     while IFS= read -r f; do
       [ -z "$f" ] && continue
+      local base; base="$(basename "$f")"
+      [[ "$base" == "CHANGELOG.md" ]] && continue
+      [[ "$base" == "user_instructions.md" ]] && continue
+      [[ "$base" == "user_instruction_analysis.md" ]] && continue
       for entry in "${ACRONYM_DICT[@]}"; do
         local acr="${entry%%:*}"
         local full="${entry#*:}"
