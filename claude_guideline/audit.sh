@@ -221,14 +221,13 @@ audit_project() {
     fi
   fi
 
-  # 7) 빈 docs/ 하위 폴더
+  # 7) docs/ 하위 폴더 README 부재 (v1.8.6: 빈 폴더 자체는 정상, README 부재만 경고)
   while IFS= read -r d; do
     [ -z "$d" ] && continue
-    if [ -z "$(ls -A "$d" 2>/dev/null)" ]; then
-      echo "${C_YEL}  [empty]${C_RST} $d/ 빈 폴더 — 삭제 또는 README+.gitkeep 권고"
-      N_ISSUE+=1
+    if [ ! -f "$d/README.md" ]; then
+      echo "${C_DIM}  [no-readme]${C_RST} $d/ — README.md 부재. install.sh / update.sh 재실행 또는 stub README 작성 권고"
     fi
-  done < <(find "$docs" -mindepth 1 -maxdepth 2 -type d 2>/dev/null)
+  done < <(find "$docs" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
 
   # 8) ROS2 워크스페이스 패키지 docs/ 누락 (src/<pkg>/package.xml 있고 src/<pkg>/docs/ 없음)
   if [ -d "$proj/src" ]; then

@@ -109,9 +109,22 @@ done
 
 chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh" "$SCRIPT_DIR/hooks/session_start_claude_mistake.sh"
 
-# SOP 가 의존하는 표준 폴더 보강 (없을 때만 생성, 기존 README 는 덮어쓰지 않음)
+# docs/ 표준 폴더 전체 보강 (v1.8.6: install.sh 와 동일 정책, 기존 README 는 덮어쓰지 않음)
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-mkdir -p "$PROJECT_ROOT/docs/claude-mistake" "$PROJECT_ROOT/docs/user_instructions" "$PROJECT_ROOT/docs/worklog"
+mkdir -p \
+  "$PROJECT_ROOT/docs/architecture" \
+  "$PROJECT_ROOT/docs/usage" \
+  "$PROJECT_ROOT/docs/issues_and_fixes" \
+  "$PROJECT_ROOT/docs/assets" \
+  "$PROJECT_ROOT/docs/user_instructions" \
+  "$PROJECT_ROOT/docs/worklog" \
+  "$PROJECT_ROOT/docs/claude-mistake" \
+  "$PROJECT_ROOT/docs/code_review" \
+  "$PROJECT_ROOT/docs/refactoring" \
+  "$PROJECT_ROOT/docs/analysis" \
+  "$PROJECT_ROOT/docs/test" \
+  "$PROJECT_ROOT/docs/troubleshooting" \
+  "$PROJECT_ROOT/docs/api"
 
 if [ ! -f "$PROJECT_ROOT/docs/claude-mistake/README.md" ]; then
   echo "[+] Downloading claude-mistake/README.md (신규)"
@@ -119,31 +132,47 @@ if [ ! -f "$PROJECT_ROOT/docs/claude-mistake/README.md" ]; then
     -o "$PROJECT_ROOT/docs/claude-mistake/README.md"
 fi
 
-if [ ! -f "$PROJECT_ROOT/docs/user_instructions/README.md" ]; then
-  cat > "$PROJECT_ROOT/docs/user_instructions/README.md" <<'EOF'
-# 사용자 지시 기록 (user_instructions)
+write_stub() {
+  local path="$1"; local title="$2"; local body="$3"
+  [ -f "$path" ] && return 0
+  printf '# %s\n\n%s\n' "$title" "$body" > "$path"
+}
 
-사용자가 터미널에 입력한 지시사항의 시간 누적 기록 전용. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §3.
+write_stub "$PROJECT_ROOT/docs/architecture/README.md" "구조 · 설계 (architecture)" \
+  "프로젝트 / 워크스페이스의 구조·설계 문서. ROS2 워크스페이스는 [documentation.md](../claude_guideline/documentation.md) §ROS2 특칙 참조."
 
-- 사용자 원문 인용만 (요약·해석 금지)
-- 시간 역순 (최신 위), KST 시각
-- 처리 결과·산출물은 본 폴더 금지 → [worklog/](../worklog/) 또는 `code_review/` / `analysis/` 책임
+write_stub "$PROJECT_ROOT/docs/usage/README.md" "설치 · 실행 · 튜토리얼 (usage)" \
+  "설치 / 실행 / 사용 가이드. 단일 \`.md\` 파일 (\`INSTALLATION.md\`, \`USER_GUIDE.md\` 등) 흡수 대상."
 
-실제 사용자 지시는 `user_instructions.md` 에 누적.
-EOF
-fi
+write_stub "$PROJECT_ROOT/docs/issues_and_fixes/README.md" "이슈 · 수정 기록 (issues_and_fixes)" \
+  "이슈 발생 · 분석 · 수정 결과를 시간 누적 (최신 위). 형식: \`YYYY-MM-DD.md\`."
 
-if [ ! -f "$PROJECT_ROOT/docs/worklog/README.md" ]; then
-  cat > "$PROJECT_ROOT/docs/worklog/README.md" <<'EOF'
-# 작업 기록 (worklog)
+write_stub "$PROJECT_ROOT/docs/assets/README.md" "이미지 · 동영상 · 다이어그램 (assets)" \
+  "스크린샷, RViz 캡처, 다이어그램 등 바이너리 리소스."
 
-사용자 지시에 대한 처리 결과·결론·산출물의 시간 누적 기록. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §9 (Step 8).
+write_stub "$PROJECT_ROOT/docs/user_instructions/README.md" "사용자 지시 기록 (user_instructions)" \
+  "사용자가 터미널에 입력한 지시사항의 시간 누적 기록 전용. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §3. 사용자 원문 인용만. 처리 결과는 [worklog/](../worklog/) 책임. 실제 지시는 \`user_instructions.md\` 에 누적."
 
-- 파일 단위: `YYYY-MM-DD.md` (시간 역순)
-- 매 entry: `### 트리거 요청` ([user_instructions.md](../user_instructions/user_instructions.md) 참조) + `### 처리` + `### 결론 / 산출물`
-- 코드 리뷰 / 분석 / 리팩토링은 본 폴더가 아닌 `code_review/` / `analysis/` / `refactoring/` 책임
-EOF
-fi
+write_stub "$PROJECT_ROOT/docs/worklog/README.md" "작업 기록 (worklog)" \
+  "사용자 지시에 대한 처리 결과·결론·산출물 시간 누적 기록. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §9. 파일: \`YYYY-MM-DD.md\`."
+
+write_stub "$PROJECT_ROOT/docs/code_review/README.md" "코드 리뷰 결과 (code_review)" \
+  "코드 리뷰·외부 advisor (Codex/Gemini ccg) 결과 리포트."
+
+write_stub "$PROJECT_ROOT/docs/refactoring/README.md" "리팩토링 계획·결과 (refactoring)" \
+  "리팩토링 계획·진행·결과 기록."
+
+write_stub "$PROJECT_ROOT/docs/analysis/README.md" "분석 · 리서치 (analysis)" \
+  "분석 보고서, 리서치 결과, phase 리포트."
+
+write_stub "$PROJECT_ROOT/docs/test/README.md" "테스트 시나리오 · 리포트 (test)" \
+  "테스트 계획·시나리오·실행 리포트."
+
+write_stub "$PROJECT_ROOT/docs/troubleshooting/README.md" "문제 해결 (troubleshooting)" \
+  "운영 / 디버깅 트러블슈팅 가이드."
+
+write_stub "$PROJECT_ROOT/docs/api/README.md" "수동작성 API 참조 (api)" \
+  "수동 작성 API 문서. 자동생성 API 는 repo root \`api/\` 와 택일."
 
 echo ""
 echo "[OK] 업데이트 완료: $CURRENT_VERSION -> $UPSTREAM_VERSION"

@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.8.6 — 2026-05-11
+
+docs/ 표준 폴더 전체를 install/update 자동 생성 대상으로 확장 + "빈 폴더 금지" 정책 폐기. 이전까지 v1.8.5 의 SOP 의존 3개 폴더만 자동 생성되었으나, SOP 가 의존하지 않는 일반 카테고리 폴더 (architecture / usage / issues_and_fixes / assets / code_review / refactoring / analysis / test / troubleshooting / api) 도 신규 프로젝트에서 사용자가 수동 mkdir 해야 했던 마찰 해소.
+
+### 변경
+
+- `claude_guideline/documentation.md` §docs/ 표준 폴더:
+  - **수정**: "처음 생성 시에는 `docs/README.md` 하나만 두고 … 활동 발생 시 추가 (빈 폴더 금지)" 정책 폐기. install/update 가 모든 표준 폴더를 자동 생성하며, 활동 미발생 폴더는 README 만 남고 비어 있어도 정상.
+- `claude_guideline/audit.sh`:
+  - §7 `[empty]` 룰을 `[no-readme]` 로 정정. 빈 폴더 자체는 OK, README.md 부재만 정보성 권고. `N_ISSUE+=1` 카운트도 제거 (강제 X).
+- `claude_guideline/install.sh`, `update.sh`:
+  - 자동 생성 폴더 4종 → 13종 확장: architecture, usage, issues_and_fixes, assets, user_instructions, worklog, claude-mistake, code_review, refactoring, analysis, test, troubleshooting, api.
+  - 각 폴더에 역할·SSOT 링크를 담은 stub README 자동 배치 (`write_stub` 헬퍼 함수). claude-mistake/README.md 만 SSOT 원격 다운로드.
+  - 기존 README 가 있으면 덮어쓰지 않음 (모든 stub 작성에 `if [ -f ... ]` 가드).
+
+### 트리거
+
+사용자 지적 (2026-05-11):
+
+> "폴더 /home/amap/Project/claude_code/docs 에 있는 폴더는 다 설치하게 만들어야 하지 않을까요?"
+> "'처음 생성 시에는 docs/README.md 하나만 두고, 아래 폴더는 해당 활동이 실제로 발생하면 그 시점에 추가한다(빈 폴더 금지).' ← 수정해야 합니다. 잘못 만들어진 정책임"
+
+근본 원인: v1.8.5 가 SOP 의존 3개 폴더만 자동화하고 나머지 표준 폴더는 기존 정책("활동 발생 시 추가") 을 따랐으나, 신규 프로젝트가 SSOT 표준 구조를 한 번에 받지 못해 사용자가 폴더마다 수동 mkdir 해야 하는 마찰 누적. 정책 자체가 install 자동화와 충돌.
+
+### 호환성
+
+patch bump (1.8.5 → 1.8.6). 기존 다운스트림은 `bash docs/claude_guideline/update.sh` 실행 시 누락 폴더 자동 보충. 기존 README 는 보존. audit.sh 의 `[empty]` 경고를 받던 다운스트림은 본 룰 정정으로 경고 사라짐.
+
 ## 1.8.5 — 2026-05-11
 
 SOP 가 의존하는 표준 폴더(`docs/claude-mistake/`, `docs/user_instructions/`, `docs/worklog/`)를 install/update 가 자동 생성하도록 정정. 이전까지는 `claude_guideline/` 만 자동 설치되고 나머지 3개 폴더는 사용자가 수동 mkdir 해야 했음 — SOP 흐름에 폴더 부재 시 어떻게 만드는지 절차 누락.
