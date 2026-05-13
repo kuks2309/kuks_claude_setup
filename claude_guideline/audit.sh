@@ -244,6 +244,59 @@ audit_project() {
     fi
   done < <(find "$docs" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
 
+  # 7.5) Authoring SSOT vs Mirror 가드 (F01: documentation.md §SSOT 경로)
+  # authoring SSOT 는 본 audit.sh 가 있는 디렉토리 (= kuks_claude_setup/claude_guideline/).
+  # mirror 는 다운스트림 프로젝트의 docs/claude_guideline/.
+  # WHITELIST: 시차 허용 자산 (VERSION, CHANGELOG.md).
+  local script_dir; script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [ -d "$docs/claude_guideline" ] && [ "$script_dir" != "$docs/claude_guideline" ]; then
+    # [tree-diff]: authoring vs mirror 파일 차이 검출
+    while IFS= read -r mirror_file; do
+      [ -z "$mirror_file" ] && continue
+      local rel="${mirror_file#$docs/claude_guideline/}"
+      case "$rel" in
+        VERSION|CHANGELOG.md) continue ;;
+      esac
+      local auth_file="$script_dir/$rel"
+      if [ -f "$auth_file" ] && ! diff -q "$auth_file" "$mirror_file" >/dev/null 2>&1; then
+        echo "${C_YEL}  [tree-diff]${C_RST} docs/claude_guideline/$rel ↔ authoring SSOT 와 다름. update.sh 재실행 또는 authoring 측에서 변경 후 sync 권고"
+        N_ISSUE+=1
+      fi
+    done < <(find "$docs/claude_guideline" -maxdepth 2 -type f -name '*.md' 2>/dev/null)
+    # [mirror-only-file]: mirror 에만 있는 파일 검출
+    while IFS= read -r mirror_file; do
+      [ -z "$mirror_file" ] && continue
+      local rel="${mirror_file#$docs/claude_guideline/}"
+      local auth_file="$script_dir/$rel"
+      if [ ! -f "$auth_file" ]; then
+        echo "${C_RED}  [mirror-only-file]${C_RST} docs/claude_guideline/$rel — authoring SSOT 에 부재. (a) authoring 추가, (b) mirror 삭제, (c) 참조 제거 중 택일"
+        N_ISSUE+=1
+      fi
+    done < <(find "$docs/claude_guideline" -maxdepth 2 -type f -name '*.md' 2>/dev/null)
+    # [authoring-mtime]: mirror 가 authoring 보다 새로움 (직접 수정 의심)
+    while IFS= read -r mirror_file; do
+      [ -z "$mirror_file" ] && continue
+      local rel="${mirror_file#$docs/claude_guideline/}"
+      local auth_file="$script_dir/$rel"
+      if [ -f "$auth_file" ] && [ "$mirror_file" -nt "$auth_file" ]; then
+        echo "${C_DIM}  [authoring-mtime]${C_RST} docs/claude_guideline/$rel 가 authoring 보다 새로움. mirror 직접 수정 의심"
+      fi
+    done < <(find "$docs/claude_guideline" -maxdepth 2 -type f -name '*.md' 2>/dev/null)
+  fi
+
+  # 7.6) Template parity 가드 (F02: templates/CLAUDE.md.template ↔ README.md Tier 표)
+  local readme_md="$script_dir/README.md"
+  local tpl_md="$script_dir/templates/CLAUDE.md.template"
+  if [ -f "$readme_md" ] && [ -f "$tpl_md" ]; then
+    # README Tier 표의 각 .md 파일이 template 에 등장하는지 검사
+    while IFS= read -r ref_file; do
+      [ -z "$ref_file" ] && continue
+      if ! grep -q "$ref_file" "$tpl_md"; then
+        echo "${C_DIM}  [template-vs-readme]${C_RST} $ref_file — README Tier 표에는 있으나 template 에 미반영. templates/CLAUDE.md.template 동기화 권고"
+      fi
+    done < <(grep -oE '\[[a-z_]+\.md\]\(([a-z_]+\.md)\)' "$readme_md" | sed -E 's/.*\(([^)]+)\)/\1/' | sort -u)
+  fi
+
   # 8) ROS2 워크스페이스 패키지 docs/ 누락 (src/<pkg>/package.xml 있고 src/<pkg>/docs/ 없음)
   if [ -d "$proj/src" ]; then
     while IFS= read -r pkg_xml; do

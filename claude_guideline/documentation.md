@@ -67,6 +67,49 @@
 - 모듈 CLAUDE.md 는 워크스페이스 가이드라인을 복제하지 않고, **모듈 고유 규칙**(핀맵·상수·하드웨어 명령) 만 작성한다.
 - 규칙 변경이 필요하면 해당 SSOT 파일을 먼저 수정하고 사용자 승인을 받는다.
 
+## SSOT 경로 (Authoring vs Mirror)
+
+본 가이드라인 자산의 **authoring SSOT** 는 `kuks_claude_setup/claude_guideline/` 1 곳뿐이다.
+
+- **Authoring SSOT** (룰을 수정·신설하는 위치): `kuks_claude_setup/claude_guideline/`
+- **Generated mirror** (다운스트림 설치본): `docs/claude_guideline/` — `install.sh` / `update.sh` 산출물. **직접 수정 금지** — 변경이 필요하면 authoring SSOT 를 수정 후 `update.sh` 재실행.
+- 본 레포 내부 cross-reference 는 bare 상대경로 (`[claude_md.md](claude_md.md)`) 를, 다운스트림 사용자가 실행하는 명령은 `docs/claude_guideline/...` 절대 표기를 쓴다.
+- mirror 직접 수정 시 다음 `update.sh` 에서 덮어쓰임. audit.sh `[tree-diff]` / `[mirror-only-file]` 룰이 drift 검출.
+
+## 용어 표준 (Terminology SSOT)
+
+본 워크스페이스의 모든 마크다운 자산이 따르는 표기 표준. 어휘 / 어투 / 디렉터리 네이밍 / 파일명을 한 곳에서 정의한다 (재발 방지: `audit.sh [terminology-drift]`).
+
+### 표준 어휘
+
+| 개념 | KO prose | EN / 제품명 | 코드 / CLI 토큰 | 파일명 |
+|---|---|---|---|---|
+| skill | **스킬** | Skill (Title) | `skill` | `SKILL.md` (번들) / `skills/<kebab>.md` (인라인) |
+| agent | **에이전트** / 서브에이전트 | Agent (Title) | `agent`, `sub-agent` | — |
+| workflow | **워크플로** | workflow | `workflow` | — |
+| user instruction | **사용자 지시사항** (명사) / "사용자가 지시한 사항" (서술구) | (영문 사용 금지 — 한국어 SSOT) | — | — |
+| guideline | **지침** (umbrella) / **규칙** (도메인) / **원칙** (불변량) | guideline | — | — |
+
+- `워크플로우` (잘못된 표기) → `워크플로`. `사용자 요청` / `요청사항` / `request` → `사용자 지시사항`.
+- prose 의 `SKILL` (all-caps) 금지 — 파일명 / CLI 토큰 한정.
+
+### 어투 규칙
+
+- `claude_guideline/**` (메타 규칙) = **평어 (`-한다`)**
+- `skills/**`, `agents/**`, 패키지 README, 루트 `README.md` = **존댓말 (`-합니다`)**
+- 한 파일 내 평어 / 존댓말 혼용 금지 (audit.sh 가 검출).
+
+### 디렉터리 네이밍
+
+- 표준: **kebab-case** (예: `claude-mistake`, `pptx-design-styles`, `web-to-pdf`).
+- Legacy snake-case (`claude_guideline/`, `conversation_backup/`) 는 외부 cross-reference 비용으로 유예. 신규 디렉터리는 kebab 강제.
+- 한글 디렉터리명 (`hwp스킬/`) 은 후속 PR 에서 ASCII rename.
+
+### 파일명 ↔ H1 일관성
+
+- 파일명과 H1 헤딩이 같은 어휘를 사용해야 한다 (`documentation.md` ↔ `# 문서 작성 규칙`).
+- 다국어 README 는 H1 도 언어별로 분기 (`README.md` = 영문 H1, `README_ko.md` = 한국어 H1).
+
 ## 폴더 명명 규칙 (Canonical)
 
 폴더명은 파일명보다 강한 일관성을 요구한다. 변종이 누적되면 install.sh / audit.sh 가 SSOT 룰을 자동 적용할 수 없게 되기 때문이다.

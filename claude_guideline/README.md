@@ -1,8 +1,8 @@
 # Claude 작업 지침
 
-Claude 가 본 프로젝트(CRCS / ROS2 / 임베디드 등)에서 어떻게 일할지 정의하는 메타 규칙의 단일 근원(SSOT).
+Claude 가 다운스트림 프로젝트 (ROS2 / 임베디드 / 일반 SW 등) 에서 어떻게 일할지 정의하는 메타 규칙의 단일 근원(SSOT).
 
-본 폴더의 규칙은 워크스페이스 루트 [`CLAUDE.md`](../../CLAUDE.md) 의 "문서 작업 규칙" 섹션에서 진입한다. CLAUDE.md 에는 복제하지 않는다.
+본 폴더의 규칙은 **다운스트림 프로젝트의 워크스페이스 루트 `CLAUDE.md`** (본 SSOT 저장소에는 없음 — [`templates/CLAUDE.md.template`](templates/CLAUDE.md.template) 참조) 의 "문서 작업 규칙" 섹션에서 진입한다. CLAUDE.md 에는 복제하지 않는다.
 
 ## 진입점 (읽는 순서)
 

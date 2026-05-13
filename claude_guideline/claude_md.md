@@ -34,7 +34,7 @@ CLAUDE.md 는 Claude Code 가 프로젝트 작업 시 *자동 로드* 하는 메
 
 ## 3. 표준 구조 (Thin SSOT 위임형)
 
-본 프로젝트(claude_code) 의 CLAUDE.md (51줄) 가 표준 모범. 본문은 SSOT 링크만, 룰 자체는 `docs/claude_guideline/` 또는 `kuks_claude_setup/claude_guideline/` 에 위치.
+본 프로젝트(claude_code) 의 CLAUDE.md 가 표준 모범 (≤60줄, 얇은 SSOT 위임형). 본문은 SSOT 링크만, 룰 authoring SSOT 는 `kuks_claude_setup/claude_guideline/` 1 곳. downstream 프로젝트는 `docs/claude_guideline/` mirror 를 참조하되 직접 수정하지 않는다 ([documentation.md](documentation.md) §SSOT 경로 참조).
 
 ### 3.1 권장 템플릿 ([templates/CLAUDE.md.template](templates/CLAUDE.md.template) 참조)
 

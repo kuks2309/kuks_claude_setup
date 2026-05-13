@@ -12,7 +12,7 @@
 
 ## 사용 규칙
 
-- 본 폴더의 파일은 git 에 commit 하지 않는다 (`.gitignore` 에 `docs/claude_guideline/local/` 또는 본 폴더의 위치를 추가).
+- 다운스트림 프로젝트에서 본 폴더의 파일은 git 에 commit 하지 않는다 — `<프로젝트>/.gitignore` 에 `docs/claude_guideline/local/` 를 추가. (본 SSOT 저장소에서는 README.md 만 추적되며 별도 `.gitignore` 항목 불필요.)
 - 본 README 만 예외적으로 commit 되어 폴더 존재와 사용법을 설명한다.
 - 비밀 (.env 의 값, 토큰, 키) 은 본 폴더에도 두지 않는다 — 비밀 관리 시스템 또는 환경변수만 사용.
 - 일반화 가능한 규칙이 발견되면 상위 [../README.md](../README.md) 에 승격한다.
@@ -27,4 +27,4 @@ local/
 └── modules.md          # 모듈별 CLAUDE.md 위치 + 하드웨어 매핑
 ```
 
-본 워크스페이스에서 어떤 override 가 작성되어 있는지는 워크스페이스 루트 `CLAUDE.md` 에서 진입 링크로 안내한다.
+다운스트림 프로젝트의 워크스페이스 루트 `CLAUDE.md` 에서 본 폴더 안 override 파일을 진입 링크로 안내한다.

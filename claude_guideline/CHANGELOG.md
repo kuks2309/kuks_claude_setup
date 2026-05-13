@@ -301,7 +301,7 @@ minor bump (1.7.0 → 1.8.0). 기존 설치 repo 는 `bash docs/claude_guideline
 
 - 키워드 (datasheet, 데이터시트, spec, 사양, INL, DNL, AEC-Q100, Operation Conditions, Electrical Characteristics, MHz, fADCI, fSPB, 위반, 초과, non-compliance, violation) 자동 트리거
 - 핵심 3 줄 요약 + 작업 전/중/후 체크리스트 + 다운로드 절차 + 도입 사례
-- SSOT 룰 ([`claude_guideline/manual.md`](claude_guideline/manual.md)) 진입점 역할
+- SSOT 룰 ([`manual.md`](manual.md)) 진입점 역할
 
 ### 트리거 사건
 

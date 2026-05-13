@@ -2,7 +2,7 @@
 
 외부 벤더의 매뉴얼·데이터시트·프로토콜 명세를 어디에 보관하고, 어떻게 인용하며, 어떻게 검증할지 정하는 단일 근원. 본 룰 위반 시 거짓 단정 누적으로 다중 정정 라운드 / 토큰 낭비 / 신뢰 손상이 발생한다 (실제 사례 §12 참조).
 
-본 룰은 OMC Skill `manual-first` 로도 등록되어 spec 관련 키워드 (datasheet, 데이터시트, manual, 매뉴얼, spec, 사양, Operation Conditions, Electrical Characteristics, 위반, 초과, non-compliance, violation, 무보증 등) 감지 시 자동 활성화된다.
+본 룰은 OMC Skill `manual-first` 로도 등록되어 spec 관련 키워드 (datasheet, 데이터시트, manual, 매뉴얼, spec, 사양, Operation Conditions, Electrical Characteristics, 위반, 초과, non-compliance, violation, 무보증 등) 등장 시 본 룰을 **자동 인용 (passive cite)** 한다 — 사용자 명시 지시 없이 추가 작업 수행 금지 ([skill_update.md](skill_update.md) §자동화 정책).
 
 ---
 
