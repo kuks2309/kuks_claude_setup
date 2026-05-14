@@ -174,7 +174,7 @@ audit_project() {
       [[ "$base" == "README.md" ]] && continue
       # 오분류 패턴 (파일명)
       if [[ "$base" =~ (review|report|summary|analysis) ]]; then
-        echo "${C_YEL}  [user-instructions-misclass]${C_RST} $f — $ui_base/ 는 사용자 지시 기록 전용 (형식: user_instruction_handling_sop.md §3). ${C_GRN}code_review/${C_RST} 또는 ${C_GRN}analysis/${C_RST} 로 이전 권고"
+        echo "${C_YEL}  [user-instructions-misclass]${C_RST} $f — $ui_base/ 는 사용자 지시 기록 전용 (형식: user_instruction_recording.md). ${C_GRN}code_review/${C_RST} 또는 ${C_GRN}analysis/${C_RST} 로 이전 권고"
         N_ISSUE+=1
       fi
     done < <(find "$ui_dir" -maxdepth 1 -type f -name '*.md' 2>/dev/null)
@@ -182,7 +182,7 @@ audit_project() {
     while IFS= read -r f; do
       [ -z "$f" ] && continue
       if grep -qE "^### (처리|결론|산출물)" "$f" 2>/dev/null; then
-        echo "${C_YEL}  [user-instructions-headings]${C_RST} $f — ### 처리/### 결론/### 산출물 헤딩 검출. v1.8.2 SOP §3 정정으로 본 헤딩은 ${C_GRN}docs/worklog/${C_RST} 책임. requests.md → user_instructions.md 마이그레이션 시 worklog 로 이전 권고"
+        echo "${C_YEL}  [user-instructions-headings]${C_RST} $f — ### 처리/### 결론/### 산출물 헤딩 검출. user_instruction_recording.md §금지 헤딩 으로 본 헤딩은 ${C_GRN}docs/worklog/${C_RST} 책임. requests.md → user_instructions.md 마이그레이션 시 worklog 로 이전 권고"
         N_ISSUE+=1
       fi
     done < <(find "$ui_dir" -maxdepth 1 -type f -name '*.md' 2>/dev/null)
@@ -331,14 +331,12 @@ audit_project() {
   # 화이트리스트:
   #   - CHANGELOG.md: 역사적 entry 보존
   #   - user_instructions.md: 사용자 원문 quote 보존
-  #   - user_instruction_analysis.md: 폐기/통합 결정 진행 중
   if [ -d "$docs" ]; then
     while IFS= read -r f; do
       [ -z "$f" ] && continue
       local base; base="$(basename "$f")"
       [[ "$base" == "CHANGELOG.md" ]] && continue
       [[ "$base" == "user_instructions.md" ]] && continue
-      [[ "$base" == "user_instruction_analysis.md" ]] && continue
       for entry in "${ACRONYM_DICT[@]}"; do
         local acr="${entry%%:*}"
         local full="${entry#*:}"

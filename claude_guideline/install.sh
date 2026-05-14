@@ -32,7 +32,7 @@ FILES=(
   "tech_debt.md"
   "iteration_anti_pattern.md"
   "skill_update.md"
-  "user_instruction_handling_sop.md"
+  "user_instruction_recording.md"
   "claude_md.md"
   "VERSION"
   "CHANGELOG.md"
@@ -97,10 +97,10 @@ write_stub docs/assets/README.md "이미지 · 동영상 · 다이어그램 (ass
   "스크린샷, RViz 캡처, 다이어그램 등 바이너리 리소스. 본문 \`.md\` 와 분리하여 보관."
 
 write_stub docs/user_instructions/README.md "사용자 지시 기록 (user_instructions)" \
-  "사용자가 터미널에 입력한 지시사항의 시간 누적 기록 전용. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §3. 사용자 원문 인용만 (요약·해석 금지). 처리 결과·산출물은 [worklog/](../worklog/) 또는 \`code_review/\` / \`analysis/\` 책임. 실제 지시는 \`user_instructions.md\` 에 누적."
+  "사용자가 터미널에 입력한 지시사항의 시간 누적 기록 전용. 형식 SSOT: [user_instruction_recording.md](../claude_guideline/user_instruction_recording.md). 사용자 원문 인용만 (요약·해석 금지). 처리 결과·산출물은 [worklog/](../worklog/) 또는 \`code_review/\` / \`analysis/\` 책임. 실제 지시는 \`user_instructions.md\` 에 누적."
 
 write_stub docs/worklog/README.md "작업 기록 (worklog)" \
-  "사용자 지시에 대한 처리 결과·결론·산출물 시간 누적 기록. 형식 SSOT: [user_instruction_handling_sop.md](../claude_guideline/user_instruction_handling_sop.md) §9. 파일: \`YYYY-MM-DD.md\`. 매 entry 는 \`### 트리거 요청\` ([user_instructions.md](../user_instructions/user_instructions.md) 참조) + \`### 처리\` + \`### 결론 / 산출물\`."
+  "사용자 지시에 대한 처리 결과·결론·산출물 시간 누적 기록. 폴더 정의 SSOT: [documentation.md](../claude_guideline/documentation.md) §docs 표준 폴더. 파일: \`YYYY-MM-DD.md\`. 매 entry 는 \`### 트리거 요청\` ([user_instructions.md](../user_instructions/user_instructions.md) 참조) + \`### 처리\` + \`### 결론 / 산출물\`."
 
 write_stub docs/code_review/README.md "코드 리뷰 결과 (code_review)" \
   "코드 리뷰·외부 advisor (Codex/Gemini ccg) 결과 리포트. \`code-review/\` / \`code_reivew/\` 변종은 본 폴더로 통일."
