@@ -231,6 +231,149 @@ grep -oE "\[(QoS|ns|exec|param|runtime|lifecycle|tf|launch)\]" $TARGET | sort -u
 
 ---
 
+## 8. 기존 워크스페이스 인터페이스 감사 SOP
+
+§2 인벤토리 표는 **코드 작성 시** 양식이다. 본 절은 반대 방향 — **기존 워크스페이스에서 토픽 / 서비스 / 액션 / QoS 인터페이스를 역추출·정규화·검증**하는 절차다.
+
+### 8.1 적용 시점
+
+다음 1개 이상 충족 시 본 SOP 실행 의무:
+
+- 기존 ROS 2 워크스페이스를 처음 분석·인수·코드 리뷰할 때
+- 인터페이스 문서(`docs/<pkg>/interfaces.md`)가 없거나 코드와 어긋났다고 의심될 때
+- 노드별 토픽 / 액션 리스트 또는 QoS 준수 여부를 보고해야 할 때
+
+### 8.2 산출물 위치
+
+| 산출물 | 위치 | 내용 |
+|---|---|---|
+| 패키지별 인터페이스 | `docs/<pkg>/interfaces.md` | §2.1~§2.7 표를 역추출 값으로 채움 |
+| 워크스페이스 집계 | `docs/interfaces_index.md` | 노드↔토픽 매핑 + §8.5 QoS 매트릭스 + §8.6 불일치 보고 |
+
+**메타 감사 모드** — 여러 워크스페이스를 한 외부 위치에 수집할 때는 `<수집경로>/<workspace_slug>/` 하위에 위 구조를 그대로 출력하고, 대상 워크스페이스 repo 는 read-only 로 둔다 (소스만 읽고 산출물은 외부에 기록). 수집경로·slug 규칙은 작업 지시 시 명시한다.
+
+### 8.3 3단계 절차
+
+| Phase | 입력 | 명령 / 패턴 | 출력 |
+|---|---|---|---|
+| **P1 문서 수집** | 워크스페이스 내 `docs/`, `README.md` | `find` + `grep -lEi 'topic|qos|publisher|subscriber'` 로 기존 인터페이스 서술 검색 | P1 인벤토리 (문서 기준) |
+| **P2 코드 정적 분석** | 소스 트리 (`src/**`) | 아래 §8.3.1 패턴 grep / AST 검색 | P2 인벤토리 (코드 기준) |
+| **P3 런타임 실측** | 빌드+노드 실행 가능한 환경 | 아래 §8.3.2 `ros2` CLI 명령 | P3 인벤토리 (런타임 ground truth) |
+
+P3 가 불가능한 환경(실 로봇 부재 · 빌드 실패 · HIL 미구성)은 **"P3 skipped + 사유"** 를 §8.6 에 명시한다. P1+P2 만으로도 본 SOP 는 완수로 인정하되, QoS 매트릭스의 실측 열은 `(미실측)` 으로 표기한다.
+
+#### 8.3.1 P2 코드 정적 분석 패턴
+
+```bash
+# Publisher / Subscriber
+grep -rEn 'create_publisher|create_subscription|\.advertise|\.subscribe' src/
+# Service / Client
+grep -rEn 'create_service|create_client' src/
+# Action
+grep -rEn 'ActionServer|ActionClient|rclcpp_action::create_' src/
+# Parameter
+grep -rEn 'declare_parameter|declare_parameters' src/
+# QoS 리터럴 / 프로파일
+grep -rEn 'QoSProfile|qos_profile_sensor_data|rclcpp::QoS|ReliabilityPolicy|DurabilityPolicy|HistoryPolicy' src/
+# TF broadcaster
+grep -rEn 'TransformBroadcaster|StaticTransformBroadcaster' src/
+```
+
+토픽명이 런타임 remap / 네임스페이스로 결정되는 경우 코드 리터럴만으로 단정하지 말고 launch 파일의 `remappings` 와 노드 네임스페이스를 함께 확인한다.
+
+#### 8.3.2 P3 런타임 실측 명령
+
+```bash
+# 빌드 + 소싱 (워크스페이스 루트, §coding/README 0.1)
+colcon build --symlink-install && source install/setup.bash
+# 노드 기동 후:
+ros2 node list
+ros2 node info <node>                 # 노드별 pub/sub/service/action 전체
+ros2 topic list -t                    # 토픽 + 타입
+ros2 topic info <topic> -v            # QoS profile 실값 (pub/sub 별)
+ros2 service list -t
+ros2 action list -t
+ros2 param dump <node>                # 파라미터 실값
+```
+
+`ros2 node info` 와 `ros2 topic info -v` 의 출력이 노드별 토픽 리스트 + QoS 의 1차 권위 소스다.
+
+### 8.4 정규화 규칙
+
+3 소스(P1 문서 · P2 코드 · P3 런타임)가 충돌할 때 권위 순서:
+
+```text
+P3 런타임  ≻  P2 코드  ≻  P1 문서
+```
+
+근거: 런타임 = 실제 동작(ground truth), 코드 = 의도, 문서 = 설명. 정규화 표(`interfaces.md`)에는 권위 소스 값을 싣되, 다음을 지킨다:
+
+- 각 항목에 **출처 열**(`P1 / P2 / P3` 또는 조합) 명시. `P2-only` = 코드에 있으나 런타임 미관측 → dead code 또는 비활성 노드 의심 → §8.6 기재.
+- QoS 값은 P3 실측 우선, 미실측 시 P2 코드 리터럴, 둘 다 없으면 rmw 기본값을 `(추정)` 으로 표기 — [coding/README.md](README.md) §1.4 L3 추정 금지와 정렬, 추정 항목은 실측 격상 대상.
+- 충돌(같은 토픽이 소스마다 타입·QoS 다름)은 정규화 표에서 권위 값 사용 + §8.6 불일치 보고에 전체 기재.
+
+### 8.5 QoS 검증 매트릭스
+
+`interfaces_index.md` 에 토픽별 1행으로 §2.1/§2.2 표를 집계한다.
+
+| 토픽 | 메시지 타입 | Publishers (node · QoS) | Subscribers (node · QoS) | 호환성 | 권장(§3.1) 대비 |
+|---|---|---|---|---|---|
+| `/cmd_vel` | `geometry_msgs/msg/Twist` | ctrl_node · RELIABLE·VOLATILE·KEEP_LAST·10 | base_driver · RELIABLE·VOLATILE·KEEP_LAST·10 | ✅ | 명령 → `default` 부합 |
+| `/scan` | `sensor_msgs/msg/LaserScan` | lidar_node · BEST_EFFORT·VOLATILE·KEEP_LAST·5 | nav_node · RELIABLE·VOLATILE·KEEP_LAST·10 | ❌ reliability | 센서 → `sensor_data` 권장, 양쪽 BEST_EFFORT 로 통일 |
+
+**호환성 판정 (DDS request-offered 규칙)**:
+
+| 정책 | 호환 (pub offered ⊇ sub requested) | 불일치 (sub 미수신) |
+|---|---|---|
+| Reliability | pub RELIABLE → sub RELIABLE/BEST_EFFORT, pub BEST_EFFORT → sub BEST_EFFORT | pub BEST_EFFORT → sub RELIABLE |
+| Durability | pub TRANSIENT_LOCAL → sub TRANSIENT_LOCAL/VOLATILE, pub VOLATILE → sub VOLATILE | pub VOLATILE → sub TRANSIENT_LOCAL (late-join 미수신) |
+| History / depth | 직접 불일치는 아니나 depth 부족은 드롭 유발 — 권장 프로파일 §3.1 대비로 점검 | — |
+
+`❌` 1건 이상이면 §8.7 A 체크리스트 미통과 — 원인·조치를 §8.6 에 기재한다.
+
+### 8.6 불일치 보고 양식
+
+`interfaces_index.md` 말미에 작성. 무불일치 시 "불일치 없음" 한 줄.
+
+| # | 항목 | P1 문서 | P2 코드 | P3 런타임 | 판정 | 조치 |
+|---|---|---|---|---|---|---|
+| 1 | `/scan` QoS | 미기재 | BEST_EFFORT | BEST_EFFORT | 문서 누락 | `interfaces.md` 갱신 |
+| 2 | `/old_cmd` 토픽 | 기재됨 | grep 검출 | `node info` 미검출 | P2-only, dead code 의심 | 코드 확인 후 제거 또는 사유 ADR |
+| 3 | P3 전체 | — | — | skipped | 실 로봇 부재 | 실측 가능 시 재감사 |
+
+### 8.7 감사 종료 체크리스트
+
+[coding/README.md](README.md) §7 A/B/C/D 골격에 본 SOP 특화 항목을 첨가한다.
+
+#### A. 기술 부채 방지 (감사)
+- [ ] P1·P2·P3 실행 (skip 시 §8.6 에 사유)
+- [ ] 모든 노드 커버 — `ros2 node list` 전수 또는 `src/**` 진입점 전수
+- [ ] QoS 매트릭스 §8.5 작성, `❌` 0건 (잔존 시 §8.6 조치 기재)
+
+#### B. 이해 부채 방지 (감사)
+- [ ] `docs/<pkg>/interfaces.md` §2 표 채움 (출처 열 포함)
+- [ ] `docs/interfaces_index.md` 노드↔토픽 매핑 + QoS 매트릭스
+- [ ] 각 항목 권위 소스(P1/P2/P3) 명시, `(추정)` 항목 표기
+
+#### C. 의도 부채 방지 (감사)
+- [ ] 권장 QoS(§3.1) 위반인데 의도적이면 사유 ADR
+- [ ] 정규화 권위 순서(§8.4) 예외 적용 시 ADR
+
+#### D. 위반 / 예외 / 인계 (감사)
+- [ ] P3 skip 사유
+- [ ] 코드↔문서 불일치 잔존 항목 (§8.6 미해결 행)
+
+#### 자체 점검 grep (감사 산출물용 — §7 보완)
+
+```bash
+TARGET=docs/interfaces_index.md
+grep -E "토픽.*메시지 타입.*Publishers.*Subscribers.*호환성" $TARGET   # QoS 매트릭스 헤더
+grep -E "P1 문서.*P2 코드.*P3 런타임.*판정" $TARGET                      # 불일치 보고 헤더
+grep -oE "P[123](-only)?" docs/*/interfaces.md | sort -u                # 출처 표기 존재
+```
+
+---
+
 ## 룰 (요약)
 
 1. **QoS 호환성** §3.1 — pub/sub 정합, 권장 프로파일
@@ -244,3 +387,4 @@ grep -oE "\[(QoS|ns|exec|param|runtime|lifecycle|tf|launch)\]" $TARGET | sort -u
 9. **micro-ROS 시 embedded 동시 활성** §3.8
 10. **concurrency / embedded 충돌 시 해당 도메인 우선** §6
 11. **본 README 와 충돌 금지** — 상위 [coding/README.md](README.md) §1~§9 가 권위
+12. **기존 워크스페이스 인수 시 §8 감사 SOP** — 3단계(문서·코드·런타임) 역추출 + QoS 매트릭스 검증, 권위 순서 P3≻P2≻P1
