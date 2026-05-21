@@ -1,11 +1,15 @@
 # 사용자 지시 기록 (User Instruction Recording)
 
+**본 파일은 지시용 — 기록 금지. 기록 대상: `docs/user_instructions/user_instructions.md`**
+
 ## 설치 위치
 
 - **본 파일**: 대상 프로젝트의 `docs/claude_guideline/user_instruction_recording.md` 에 배치
 - **기록 산출물**: `docs/user_instructions/user_instructions.md` (대상 프로젝트 루트 기준 상대경로)
 
 본 파일이 `docs/claude_guideline/user_instruction_recording.md` 위치에 없으면 본 룰은 활성화되지 않는다. 새 프로젝트 적용 시 본 파일을 위 경로로 복사하는 것이 첫 단계.
+
+기록 산출물 (`docs/user_instructions/user_instructions.md`) 부재 시: 폴더 + 빈 파일 자동 생성 후 첫 entry 기록. 본 룰의 목적 (의도 부채 차단) 상 별도 승인 불필요.
 
 ## 기록 위치
 
