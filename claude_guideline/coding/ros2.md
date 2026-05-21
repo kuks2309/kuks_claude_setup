@@ -26,23 +26,25 @@
 
 상위 §9 (문서 양식) 의 함수표·변수표에 추가하여 ROS 2 특화 표 작성. 위치: `docs/<pkg>/` 또는 모듈 `docs/`. 패키지별 분리 (상위 §0.1 ROS 2 워크스페이스 트리).
 
+`기능` = 한 단어급 역할 요약, `설명` = 발행/구독 주기·소비처·제약 등 상세 주석. 두 열 모두 의무.
+
 ### 2.1 Subscriptions
 
-| # | 토픽 | 메시지 타입 | QoS (depth · reliability · durability · history) | 콜백 함수 | 위치 |
-|---|---|---|---|---|---|
-| 1 | `/cam_front/image_raw` | `sensor_msgs/msg/Image` | 5 · BEST_EFFORT · VOLATILE · KEEP_LAST | `on_image_cb` | `cam_node.py:42` |
+| # | 토픽 | 기능 | 설명 | 메시지 타입 | QoS (depth · reliability · durability · history) | 콜백 함수 | 위치 |
+|---|---|---|---|---|---|---|---|
+| 1 | `/cam_front/image_raw` | 전방 카메라 영상 수신 | 30fps 원본 프레임, 인지 파이프라인 입력 | `sensor_msgs/msg/Image` | 5 · BEST_EFFORT · VOLATILE · KEEP_LAST | `on_image_cb` | `cam_node.py:42` |
 
 ### 2.2 Publications
 
-| # | 토픽 | 메시지 타입 | QoS | 발행 위치 (함수) | 위치 |
-|---|---|---|---|---|---|
-| 1 | `/cmd_vel` | `geometry_msgs/msg/Twist` | 10 · RELIABLE · VOLATILE · KEEP_LAST | `publish_cmd` | `ctrl_node.cpp:88` |
+| # | 토픽 | 기능 | 설명 | 메시지 타입 | QoS | 발행 위치 (함수) | 위치 |
+|---|---|---|---|---|---|---|---|
+| 1 | `/cmd_vel` | 속도 명령 발행 | 제어 루프 20Hz 주기, base_driver 가 구독 | `geometry_msgs/msg/Twist` | 10 · RELIABLE · VOLATILE · KEEP_LAST | `publish_cmd` | `ctrl_node.cpp:88` |
 
 ### 2.3 Services / Actions
 
-| # | 이름 | 타입 | 클라이언트 / 서버 | 콜백 / 요청 위치 | 위치 |
-|---|---|---|---|---|---|
-| 1 | `/nav/set_goal` | `nav2_msgs/action/NavigateToPose` | client | `send_goal()` | `nav_client.py:24` |
+| # | 이름 | 기능 | 설명 | 타입 | 클라이언트 / 서버 | 콜백 / 요청 위치 | 위치 |
+|---|---|---|---|---|---|---|---|
+| 1 | `/nav/set_goal` | 목표 지점 네비게이션 | 외부 작업관리자가 호출, 도착까지 피드백 스트림 | `nav2_msgs/action/NavigateToPose` | client | `send_goal()` | `nav_client.py:24` |
 
 ### 2.4 Parameters (표 + YAML)
 
@@ -213,19 +215,22 @@ node_name:
 ```bash
 TARGET=docs/<pkg>/ros2_review.md  # 또는 docs/code_review/<주제>.md
 
-# 1. Subscriptions 표
-grep -E "토픽.*메시지 타입.*QoS.*콜백" $TARGET
+# 1. Subscriptions 표 (기능·설명 열 포함)
+grep -E "토픽.*기능.*설명.*메시지 타입.*QoS.*콜백" $TARGET
 
-# 2. Publications 표
-grep -E "토픽.*메시지 타입.*QoS.*발행 위치" $TARGET
+# 2. Publications 표 (기능·설명 열 포함)
+grep -E "토픽.*기능.*설명.*메시지 타입.*QoS.*발행 위치" $TARGET
 
-# 3. Parameters 표
+# 3. Services / Actions 표 (기능·설명 열 포함)
+grep -E "이름.*기능.*설명.*타입.*클라이언트 / 서버" $TARGET
+
+# 4. Parameters 표
 grep -E "이름.*타입.*default.*declare 위치" $TARGET
 
-# 4. YAML 단위 주석 (의미 그룹 또는 단위)
+# 5. YAML 단위 주석 (의미 그룹 또는 단위)
 grep -E "^\s+#\s+(rad|m|Hz|deg|ms|s|kg|°)" $TARGET
 
-# 5. 평가 태그
+# 6. 평가 태그
 grep -oE "\[(QoS|ns|exec|param|runtime|lifecycle|tf|launch)\]" $TARGET | sort -u
 ```
 
@@ -248,7 +253,7 @@ grep -oE "\[(QoS|ns|exec|param|runtime|lifecycle|tf|launch)\]" $TARGET | sort -u
 | 산출물 | 위치 | 내용 |
 |---|---|---|
 | 패키지별 인터페이스 | `docs/<pkg>/interfaces.md` | §2.1~§2.7 표를 역추출 값으로 채움 |
-| 워크스페이스 집계 | `docs/interfaces_index.md` | 노드↔토픽 매핑 + §8.5 QoS 매트릭스 + §8.6 불일치 보고 |
+| 워크스페이스 집계 | `docs/interfaces_index.md` | 노드↔토픽 매핑 + §8.5 QoS 매트릭스 + §8.6 토픽 연결 맵 + §8.7 불일치 보고 |
 
 **메타 감사 모드** — 여러 워크스페이스를 한 외부 위치에 수집할 때는 `<수집경로>/<workspace_slug>/` 하위에 위 구조를 그대로 출력하고, 대상 워크스페이스 repo 는 read-only 로 둔다 (소스만 읽고 산출물은 외부에 기록). 수집경로·slug 규칙은 작업 지시 시 명시한다.
 
@@ -260,7 +265,7 @@ grep -oE "\[(QoS|ns|exec|param|runtime|lifecycle|tf|launch)\]" $TARGET | sort -u
 | **P2 코드 정적 분석** | 소스 트리 (`src/**`) | 아래 §8.3.1 패턴 grep / AST 검색 | P2 인벤토리 (코드 기준) |
 | **P3 런타임 실측** | 빌드+노드 실행 가능한 환경 | 아래 §8.3.2 `ros2` CLI 명령 | P3 인벤토리 (런타임 ground truth) |
 
-P3 가 불가능한 환경(실 로봇 부재 · 빌드 실패 · HIL 미구성)은 **"P3 skipped + 사유"** 를 §8.6 에 명시한다. P1+P2 만으로도 본 SOP 는 완수로 인정하되, QoS 매트릭스의 실측 열은 `(미실측)` 으로 표기한다.
+P3 가 불가능한 환경(실 로봇 부재 · 빌드 실패 · HIL 미구성)은 **"P3 skipped + 사유"** 를 §8.7 에 명시한다. P1+P2 만으로도 본 SOP 는 완수로 인정하되, QoS 매트릭스의 실측 열은 `(미실측)` 으로 표기한다.
 
 #### 8.3.1 P2 코드 정적 분석 패턴
 
@@ -308,18 +313,19 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 
 근거: 런타임 = 실제 동작(ground truth), 코드 = 의도, 문서 = 설명. 정규화 표(`interfaces.md`)에는 권위 소스 값을 싣되, 다음을 지킨다:
 
-- 각 항목에 **출처 열**(`P1 / P2 / P3` 또는 조합) 명시. `P2-only` = 코드에 있으나 런타임 미관측 → dead code 또는 비활성 노드 의심 → §8.6 기재.
+- 각 항목에 **출처 열**(`P1 / P2 / P3` 또는 조합) 명시. `P2-only` = 코드에 있으나 런타임 미관측 → dead code 또는 비활성 노드 의심 → §8.7 기재.
+- `기능`·`설명` 열은 코드 주석 / docstring / 기존 P1 문서에서 추출하고, 근거가 없으면 코드 동작으로 추론하되 `(추론)` 으로 표기한다.
 - QoS 값은 P3 실측 우선, 미실측 시 P2 코드 리터럴, 둘 다 없으면 rmw 기본값을 `(추정)` 으로 표기 — [coding/README.md](README.md) §1.4 L3 추정 금지와 정렬, 추정 항목은 실측 격상 대상.
-- 충돌(같은 토픽이 소스마다 타입·QoS 다름)은 정규화 표에서 권위 값 사용 + §8.6 불일치 보고에 전체 기재.
+- 충돌(같은 토픽이 소스마다 타입·QoS 다름)은 정규화 표에서 권위 값 사용 + §8.7 불일치 보고에 전체 기재.
 
 ### 8.5 QoS 검증 매트릭스
 
-`interfaces_index.md` 에 토픽별 1행으로 §2.1/§2.2 표를 집계한다.
+`interfaces_index.md` 에 토픽별 1행으로 §2.1/§2.2 표를 집계한다. Publishers / Subscribers 셀은 `노드 · 역할 · QoS` 순으로 적는다.
 
-| 토픽 | 메시지 타입 | Publishers (node · QoS) | Subscribers (node · QoS) | 호환성 | 권장(§3.1) 대비 |
+| 토픽 | 메시지 타입 | Publishers (node · 역할 · QoS) | Subscribers (node · 역할 · QoS) | 호환성 | 권장(§3.1) 대비 |
 |---|---|---|---|---|---|
-| `/cmd_vel` | `geometry_msgs/msg/Twist` | ctrl_node · RELIABLE·VOLATILE·KEEP_LAST·10 | base_driver · RELIABLE·VOLATILE·KEEP_LAST·10 | ✅ | 명령 → `default` 부합 |
-| `/scan` | `sensor_msgs/msg/LaserScan` | lidar_node · BEST_EFFORT·VOLATILE·KEEP_LAST·5 | nav_node · RELIABLE·VOLATILE·KEEP_LAST·10 | ❌ reliability | 센서 → `sensor_data` 권장, 양쪽 BEST_EFFORT 로 통일 |
+| `/cmd_vel` | `geometry_msgs/msg/Twist` | ctrl_node · 제어 루프 · RELIABLE·VOLATILE·KEEP_LAST·10 | base_driver · 모터 구동 · RELIABLE·VOLATILE·KEEP_LAST·10 | ✅ | 명령 → `default` 부합 |
+| `/scan` | `sensor_msgs/msg/LaserScan` | lidar_node · LIDAR 드라이버 · BEST_EFFORT·VOLATILE·KEEP_LAST·5 | nav_node · 장애물 회피 · RELIABLE·VOLATILE·KEEP_LAST·10 | ❌ reliability | 센서 → `sensor_data` 권장, 양쪽 BEST_EFFORT 로 통일 |
 
 **호환성 판정 (DDS request-offered 규칙)**:
 
@@ -329,9 +335,22 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 | Durability | pub TRANSIENT_LOCAL → sub TRANSIENT_LOCAL/VOLATILE, pub VOLATILE → sub VOLATILE | pub VOLATILE → sub TRANSIENT_LOCAL (late-join 미수신) |
 | History / depth | 직접 불일치는 아니나 depth 부족은 드롭 유발 — 권장 프로파일 §3.1 대비로 점검 | — |
 
-`❌` 1건 이상이면 §8.7 A 체크리스트 미통과 — 원인·조치를 §8.6 에 기재한다.
+`❌` 1건 이상이면 §8.8 A 체크리스트 미통과 — 원인·조치를 §8.7 에 기재한다.
 
-### 8.6 불일치 보고 양식
+### 8.6 토픽 연결 맵
+
+§8.5 가 QoS 호환성 **검증**용이라면, 본 표는 통신 토폴로지·데이터 흐름 **이해**용이다. 토픽 1개당 1행, 어떤 노드가 어떤 역할로 연결되는지 서술한다.
+
+| 토픽 | 발행 노드 (역할) | 구독 노드 (역할) | 데이터 흐름 요약 |
+|---|---|---|---|
+| `/scan` | lidar_node (LIDAR 드라이버 — 원본 스캔 생성) | nav_node (장애물 회피), slam_node (맵 작성) | 센서 → 인지·SLAM, 1:N fan-out |
+| `/cmd_vel` | ctrl_node (제어 루프 — 속도 명령 산출) | base_driver (모터 구동) | 제어 → 구동, 1:1 |
+| `/map` | slam_node (점유 격자 생성, latched) | nav_node (전역 경로 계획) | SLAM → 내비, TRANSIENT_LOCAL latch |
+
+- 발행 노드가 0개인 토픽은 `발행 없음`, 구독 노드가 0개면 `구독 없음` 으로 명시 — orphan / dead topic 의심 → §8.7 불일치 보고에 등록.
+- 서비스 / 액션은 토픽이 아니므로 본 맵에 넣지 않고, §2.3 표 + §8.7 에서 server↔client 연결을 다룬다.
+
+### 8.7 불일치 보고 양식
 
 `interfaces_index.md` 말미에 작성. 무불일치 시 "불일치 없음" 한 줄.
 
@@ -341,19 +360,19 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 | 2 | `/old_cmd` 토픽 | 기재됨 | grep 검출 | `node info` 미검출 | P2-only, dead code 의심 | 코드 확인 후 제거 또는 사유 ADR |
 | 3 | P3 전체 | — | — | skipped | 실 로봇 부재 | 실측 가능 시 재감사 |
 
-### 8.7 감사 종료 체크리스트
+### 8.8 감사 종료 체크리스트
 
 [coding/README.md](README.md) §7 A/B/C/D 골격에 본 SOP 특화 항목을 첨가한다.
 
 #### A. 기술 부채 방지 (감사)
-- [ ] P1·P2·P3 실행 (skip 시 §8.6 에 사유)
+- [ ] P1·P2·P3 실행 (skip 시 §8.7 에 사유)
 - [ ] 모든 노드 커버 — `ros2 node list` 전수 또는 `src/**` 진입점 전수
-- [ ] QoS 매트릭스 §8.5 작성, `❌` 0건 (잔존 시 §8.6 조치 기재)
+- [ ] QoS 매트릭스 §8.5 작성, `❌` 0건 (잔존 시 §8.7 조치 기재)
 
 #### B. 이해 부채 방지 (감사)
-- [ ] `docs/<pkg>/interfaces.md` §2 표 채움 (출처 열 포함)
-- [ ] `docs/interfaces_index.md` 노드↔토픽 매핑 + QoS 매트릭스
-- [ ] 각 항목 권위 소스(P1/P2/P3) 명시, `(추정)` 항목 표기
+- [ ] `docs/<pkg>/interfaces.md` §2 표 채움 (기능·설명·출처 열 포함)
+- [ ] `docs/interfaces_index.md` 노드↔토픽 매핑 + QoS 매트릭스 §8.5 + 토픽 연결 맵 §8.6
+- [ ] 각 항목 권위 소스(P1/P2/P3) 명시, `(추정)`·`(추론)` 항목 표기
 
 #### C. 의도 부채 방지 (감사)
 - [ ] 권장 QoS(§3.1) 위반인데 의도적이면 사유 ADR
@@ -361,13 +380,14 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 
 #### D. 위반 / 예외 / 인계 (감사)
 - [ ] P3 skip 사유
-- [ ] 코드↔문서 불일치 잔존 항목 (§8.6 미해결 행)
+- [ ] 코드↔문서 불일치 잔존 항목 (§8.7 미해결 행)
 
 #### 자체 점검 grep (감사 산출물용 — §7 보완)
 
 ```bash
 TARGET=docs/interfaces_index.md
 grep -E "토픽.*메시지 타입.*Publishers.*Subscribers.*호환성" $TARGET   # QoS 매트릭스 헤더
+grep -E "토픽.*발행 노드.*구독 노드.*데이터 흐름" $TARGET               # 토픽 연결 맵 헤더
 grep -E "P1 문서.*P2 코드.*P3 런타임.*판정" $TARGET                      # 불일치 보고 헤더
 grep -oE "P[123](-only)?" docs/*/interfaces.md | sort -u                # 출처 표기 존재
 ```
