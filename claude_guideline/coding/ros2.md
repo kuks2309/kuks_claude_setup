@@ -253,7 +253,8 @@ grep -oE "\[(QoS|ns|exec|param|runtime|lifecycle|tf|launch)\]" $TARGET | sort -u
 | 산출물 | 위치 | 내용 |
 |---|---|---|
 | 패키지별 인터페이스 | `docs/<pkg>/interfaces.md` | §2.1~§2.7 표를 역추출 값으로 채움 |
-| 워크스페이스 집계 | `docs/interfaces_index.md` | 노드↔토픽 매핑 + §8.5 QoS 매트릭스 + §8.6 토픽 연결 맵 + §8.7 불일치 보고 |
+| 워크스페이스 집계 | `docs/interfaces_index.md` | 노드↔토픽 매핑 + §8.6 연결 맵(토픽·서비스/액션·TF) + §8.7 불일치 보고 |
+| QoS 감사 | `docs/qos_audit.md` | §8.5 QoS 검증 매트릭스 — QoS 준수는 독립 검증 산출물이므로 별도 파일로 분리 |
 
 **메타 감사 모드** — 여러 워크스페이스를 한 외부 위치에 수집할 때는 `<수집경로>/<workspace_slug>/` 하위에 위 구조를 그대로 출력하고, 대상 워크스페이스 repo 는 read-only 로 둔다 (소스만 읽고 산출물은 외부에 기록). 수집경로·slug 규칙은 작업 지시 시 명시한다.
 
@@ -299,9 +300,10 @@ ros2 topic info <topic> -v            # QoS profile 실값 (pub/sub 별)
 ros2 service list -t
 ros2 action list -t
 ros2 param dump <node>                # 파라미터 실값
+ros2 run tf2_tools view_frames        # TF 프레임 트리 → frames.gv / frames.pdf 생성
 ```
 
-`ros2 node info` 와 `ros2 topic info -v` 의 출력이 노드별 토픽 리스트 + QoS 의 1차 권위 소스다.
+`ros2 node info` 와 `ros2 topic info -v` 의 출력이 노드별 토픽 리스트 + QoS 의 1차 권위 소스다. TF 는 `view_frames` 의 `frames.gv` 가 권위 소스다.
 
 ### 8.4 정규화 규칙
 
@@ -320,7 +322,7 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 
 ### 8.5 QoS 검증 매트릭스
 
-`interfaces_index.md` 에 토픽별 1행으로 §2.1/§2.2 표를 집계한다. Publishers / Subscribers 셀은 `노드 · 역할 · QoS` 순으로 적는다.
+QoS 준수는 독립 검증 산출물이므로 별도 파일 `docs/qos_audit.md` 에 작성한다. 토픽별 1행으로 §2.1/§2.2 표를 집계하며, Publishers / Subscribers 셀은 `노드 · 역할 · QoS` 순으로 적는다.
 
 | 토픽 | 메시지 타입 | Publishers (node · 역할 · QoS) | Subscribers (node · 역할 · QoS) | 호환성 | 권장(§3.1) 대비 |
 |---|---|---|---|---|---|
@@ -337,9 +339,13 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 
 `❌` 1건 이상이면 §8.8 A 체크리스트 미통과 — 원인·조치를 §8.7 에 기재한다.
 
-### 8.6 토픽 연결 맵
+### 8.6 연결 맵
 
-§8.5 가 QoS 호환성 **검증**용이라면, 본 표는 통신 토폴로지·데이터 흐름 **이해**용이다. 토픽 1개당 1행, 어떤 노드가 어떤 역할로 연결되는지 서술한다.
+§8.5 QoS 검증과 달리, 연결 맵은 통신 토폴로지·구조 **이해**용이다. 토픽·서비스/액션·TF 세 종류를 각각 §8.6.1~§8.6.3 으로 정리해 `interfaces_index.md` 에 싣는다.
+
+#### 8.6.1 토픽 연결 맵
+
+토픽 1개당 1행, 어떤 노드가 어떤 역할로 연결되는지 서술한다.
 
 | 토픽 | 발행 노드 (역할) | 구독 노드 (역할) | 데이터 흐름 요약 |
 |---|---|---|---|
@@ -347,18 +353,47 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 | `/cmd_vel` | ctrl_node (제어 루프 — 속도 명령 산출) | base_driver (모터 구동) | 제어 → 구동, 1:1 |
 | `/map` | slam_node (점유 격자 생성, latched) | nav_node (전역 경로 계획) | SLAM → 내비, TRANSIENT_LOCAL latch |
 
-- 발행 노드가 0개인 토픽은 `발행 없음`, 구독 노드가 0개면 `구독 없음` 으로 명시 — orphan / dead topic 의심 → §8.7 불일치 보고에 등록.
-- 서비스 / 액션은 토픽이 아니므로 본 맵에 넣지 않고, §2.3 표 + §8.7 에서 server↔client 연결을 다룬다.
+발행 노드가 0개인 토픽은 `발행 없음`, 구독 노드가 0개면 `구독 없음` 으로 명시 — orphan / dead topic 의심 → §8.7 불일치 보고에 등록.
+
+#### 8.6.2 서비스 / 액션 연결 맵
+
+서비스·액션은 server↔client 호출 관계다. §2.3 표를 워크스페이스 단위로 집계한다.
+
+| 이름 | 종류 | 서버 노드 (역할) | 클라이언트 노드 (역할) | 용도 / 트리거 |
+|---|---|---|---|---|
+| `/nav/set_goal` | action | nav_node (경로 실행) | task_manager (작업 지시) | 외부 작업 지시 시 목표 전송, 도착까지 피드백 스트림 |
+| `/reset_odom` | service | odom_node (오도메트리 관리) | ui_node (운영자 UI) | 운영자가 위치 원점 리셋 요청 |
+
+- 서버 0개인데 클라이언트가 호출 = dangling client (호출 대상 부재) → §8.7 등록.
+- 클라이언트 0개인 서버 = 미사용 서비스 의심 → §8.7 등록.
+- 장시간 실행 액션은 goal/feedback/result 중 피드백 토픽도 §8.6.1 에 함께 기재.
+
+#### 8.6.3 TF 프레임 트리
+
+§2.5 TF 표를 워크스페이스 단위로 모아 frame 부모-자식 트리를 구성한다. 런타임은 `ros2 run tf2_tools view_frames` 의 `frames.gv` 가 권위 소스다.
+
+| frame | parent | broadcaster 노드 | static / dynamic | 비고 |
+|---|---|---|---|---|
+| `map` | (루트) | — | — | 전역 고정 프레임 |
+| `odom` | `map` | slam_node | dynamic | 위치 보정 변환 |
+| `base_link` | `odom` | ekf_node | dynamic | 로봇 본체 |
+| `lidar_link` | `base_link` | robot_state_publisher | static | URDF 고정 |
+
+- 루트는 1개(REP 105 기준 `map`)여야 한다. parent 가 둘 이상이거나 연결이 끊긴 frame → §8.7 등록.
+- 같은 frame 을 두 노드가 broadcast 하면 TF 충돌 → §8.7 등록.
+- 트리는 Mermaid flowchart (상위 [coding/README.md](README.md) §9.3) 로 함께 그리면 가독성이 좋다.
 
 ### 8.7 불일치 보고 양식
 
-`interfaces_index.md` 말미에 작성. 무불일치 시 "불일치 없음" 한 줄.
+`interfaces_index.md` 말미에 작성 (QoS 항목은 `qos_audit.md` 에도 교차 기재 가능). 무불일치 시 "불일치 없음" 한 줄.
 
 | # | 항목 | P1 문서 | P2 코드 | P3 런타임 | 판정 | 조치 |
 |---|---|---|---|---|---|---|
 | 1 | `/scan` QoS | 미기재 | BEST_EFFORT | BEST_EFFORT | 문서 누락 | `interfaces.md` 갱신 |
 | 2 | `/old_cmd` 토픽 | 기재됨 | grep 검출 | `node info` 미검출 | P2-only, dead code 의심 | 코드 확인 후 제거 또는 사유 ADR |
-| 3 | P3 전체 | — | — | skipped | 실 로봇 부재 | 실측 가능 시 재감사 |
+| 3 | `/reset_odom` 서비스 | 미기재 | server 검출 | client 0개 | 미사용 서버 의심 | 호출처 확인 또는 제거 |
+| 4 | `camera_link` TF | parent=`base_link` | parent=`base_link` | broadcaster 2개 | TF 충돌 | broadcaster 일원화 |
+| 5 | P3 전체 | — | — | skipped | 실 로봇 부재 | 실측 가능 시 재감사 |
 
 ### 8.8 감사 종료 체크리스트
 
@@ -367,11 +402,13 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 #### A. 기술 부채 방지 (감사)
 - [ ] P1·P2·P3 실행 (skip 시 §8.7 에 사유)
 - [ ] 모든 노드 커버 — `ros2 node list` 전수 또는 `src/**` 진입점 전수
-- [ ] QoS 매트릭스 §8.5 작성, `❌` 0건 (잔존 시 §8.7 조치 기재)
+- [ ] QoS 매트릭스 §8.5 작성 (`qos_audit.md`), `❌` 0건 (잔존 시 §8.7 조치 기재)
+- [ ] 서비스/액션 dangling client·미사용 서버 0건, TF 트리 루트 1개·충돌 0건
 
 #### B. 이해 부채 방지 (감사)
 - [ ] `docs/<pkg>/interfaces.md` §2 표 채움 (기능·설명·출처 열 포함)
-- [ ] `docs/interfaces_index.md` 노드↔토픽 매핑 + QoS 매트릭스 §8.5 + 토픽 연결 맵 §8.6
+- [ ] `docs/interfaces_index.md` 노드↔토픽 매핑 + 연결 맵 §8.6 (토픽·서비스/액션·TF)
+- [ ] `docs/qos_audit.md` QoS 매트릭스 §8.5
 - [ ] 각 항목 권위 소스(P1/P2/P3) 명시, `(추정)`·`(추론)` 항목 표기
 
 #### C. 의도 부채 방지 (감사)
@@ -385,11 +422,14 @@ P3 런타임  ≻  P2 코드  ≻  P1 문서
 #### 자체 점검 grep (감사 산출물용 — §7 보완)
 
 ```bash
-TARGET=docs/interfaces_index.md
-grep -E "토픽.*메시지 타입.*Publishers.*Subscribers.*호환성" $TARGET   # QoS 매트릭스 헤더
-grep -E "토픽.*발행 노드.*구독 노드.*데이터 흐름" $TARGET               # 토픽 연결 맵 헤더
-grep -E "P1 문서.*P2 코드.*P3 런타임.*판정" $TARGET                      # 불일치 보고 헤더
-grep -oE "P[123](-only)?" docs/*/interfaces.md | sort -u                # 출처 표기 존재
+IDX=docs/interfaces_index.md
+QOS=docs/qos_audit.md
+grep -E "토픽.*메시지 타입.*Publishers.*Subscribers.*호환성" $QOS   # QoS 매트릭스 헤더
+grep -E "토픽.*발행 노드.*구독 노드.*데이터 흐름" $IDX               # 토픽 연결 맵 헤더
+grep -E "이름.*종류.*서버 노드.*클라이언트 노드" $IDX                 # 서비스/액션 연결 맵 헤더
+grep -E "frame.*parent.*broadcaster.*static" $IDX                    # TF 프레임 트리 헤더
+grep -E "P1 문서.*P2 코드.*P3 런타임.*판정" $IDX                      # 불일치 보고 헤더
+grep -oE "P[123](-only)?" docs/*/interfaces.md | sort -u             # 출처 표기 존재
 ```
 
 ---
