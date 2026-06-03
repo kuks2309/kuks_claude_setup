@@ -47,13 +47,16 @@ done
 HOOK_FILES=(
   "README.md"
   "session_start_claude_mistake.sh"
+  "stop_check_abbreviations.py"
 )
 for f in "${HOOK_FILES[@]}"; do
   echo "[+] Downloading hooks/$f"
   curl -fsSL "$RAW_URL/hooks/$f" -o "$TARGET_DIR/hooks/$f"
 done
 
-chmod +x "$TARGET_DIR/update.sh" "$TARGET_DIR/audit.sh" "$TARGET_DIR/hooks/session_start_claude_mistake.sh"
+chmod +x "$TARGET_DIR/update.sh" "$TARGET_DIR/audit.sh" \
+  "$TARGET_DIR/hooks/session_start_claude_mistake.sh" \
+  "$TARGET_DIR/hooks/stop_check_abbreviations.py"
 
 # docs/ 표준 폴더 전체 자동 생성 (documentation.md §docs/ 표준 폴더, v1.8.6)
 # 각 폴더에 역할·SSOT 링크를 담은 stub README 자동 배치 (기존 README 는 덮어쓰지 않음)

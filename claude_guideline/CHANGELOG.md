@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.8.7 — 2026-06-03
+
+`hooks/` 에 Stop 훅 `stop_check_abbreviations.py` 추가. 응답에 풀어쓰지 않은 약어가 있으면 정지를 차단하고 "원어(한국어 의미, 약어)" 형태로 풀어쓰도록 강제 — 약어 남용 재발 차단. SessionStart 전용이던 hooks 폴더가 Stop 이벤트(.py)까지 확장됨.
+
+### 변경
+
+- `claude_guideline/hooks/stop_check_abbreviations.py` (신규): stdin 의 `transcript_path` 로 마지막 assistant 메시지를 읽어 `ABBREVIATIONS` 배열의 `(정규식, 풀어쓴 키워드)` 쌍을 검사. 약어가 풀어쓰기 없이 단독 사용되면 `{"decision":"block","reason":...}` 출력. `stop_hook_active` 가드로 무한 루프 방지. 추적 약어는 스크립트 상단 배열에서 편집.
+- `claude_guideline/hooks/README.md`: §제공 hook 표에 행 추가 + §설치(Stop 훅) 절 + python 자가 검증 예시 추가. §신규 hook 추가 시 형식을 `<event>_<purpose>.{sh,py}` 로 확장.
+- `claude_guideline/install.sh`, `update.sh`: `HOOK_FILES` 배열 + chmod 대상에 `stop_check_abbreviations.py` 추가.
+
+### 트리거
+
+사용자 지시 (2026-06-03):
+
+> "응답 검사 훅을 만들어주세요." (약어를 계속 사용하는 문제 재발 방지)
+> "방금 만든 hook을 upload 할 것" (feat/code-review-sop 브랜치)
+
+근본 원인: 약어 사용 금지 지시에도 습관적으로 약어를 풀어쓰지 않고 사용. 강제 메커니즘(Stop 훅) 부재. China 워크스페이스에서 검증 후 SSOT 에 승격.
+
 ## 1.8.6 — 2026-05-11
 
 docs/ 표준 폴더 전체를 install/update 자동 생성 대상으로 확장 + "빈 폴더 금지" 정책 폐기. 이전까지 v1.8.5 의 SOP 의존 3개 폴더만 자동 생성되었으나, SOP 가 의존하지 않는 일반 카테고리 폴더 (architecture / usage / issues_and_fixes / assets / code_review / refactoring / analysis / test / troubleshooting / api) 도 신규 프로젝트에서 사용자가 수동 mkdir 해야 했던 마찰 해소.

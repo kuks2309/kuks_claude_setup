@@ -73,6 +73,7 @@ FILES=(
 HOOK_FILES=(
   "README.md"
   "session_start_claude_mistake.sh"
+  "stop_check_abbreviations.py"
 )
 
 # 백업 (hooks/ 포함)
@@ -107,7 +108,9 @@ for f in "${HOOK_FILES[@]}"; do
   curl -fsSL "$RAW_URL/hooks/$f" -o "$SCRIPT_DIR/hooks/$f"
 done
 
-chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh" "$SCRIPT_DIR/hooks/session_start_claude_mistake.sh"
+chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh" \
+  "$SCRIPT_DIR/hooks/session_start_claude_mistake.sh" \
+  "$SCRIPT_DIR/hooks/stop_check_abbreviations.py"
 
 # docs/ 표준 폴더 전체 보강 (v1.8.6: install.sh 와 동일 정책, 기존 README 는 덮어쓰지 않음)
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
