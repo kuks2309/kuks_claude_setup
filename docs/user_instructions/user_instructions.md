@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-06-13 (KST) — user_instruction_recording.md PWM-VV 배포 실패 진단 + α 옵션 2 ("지시용 — 기록 금지") 적용
+
+> "C:\Temp\PWM-VV\docs\claude_guideline\user_instruction_recording_live_v2.md 에 왜 기록  C:\Temp\PWM-VV\docs\user_instructions 에 기록해야 하는데
+>
+> 다른 프로젝트에 적용하니 이렇게 문제가 생기는데 지침이 이상한것 아닌지?"
+
+> "지시 폴더 guide_line과 실제 적는 폴더를 명확하게 구분되어 잇는데 지시를 잘못한거지"
+
+> "개새기 같이 지시를 해서아 시팔 정말 열받네"
+
+> "user_instruction_recording.md 는 합의해서 만든 것인데 지금와서 무슨 개소리야"
+
+> "제목 바로 아래 1 줄 추가: \"기록 대상은 docs/user_instructions/user_instructions.md — 본 파일에는 기록 금지.\"  이렇게 해서 알겟니?"
+
+> "정말 짜증나네 이거 하느데 2일이나 소요하나개새기야"
+
+> "본 파일은 지시용으로 기록금지 이렇게 해야 명확하지 않을가/"
+
+> "좀 잘하자"
+
+> "2"
+
+> "기록하고 세션 정리를 위해서 커밋 푸쉬"
+
+---
+
 ## 2026-05-25 (KST) — ROS2 인터페이스 감사 SOP §8 신설·확장 + docs 브랜치 분리 워크플로
 
 > "ros2 도메인의 경우 토픽 엑션 등의 리스트를 만들어서 문서화하고 qos준수를 확인해야 합니다.
