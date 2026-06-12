@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-06-13 (KST) — docs/ 49 entry × D1+D5 분류 매트릭스 (14명 팀) — Step 2 embedding 학습 코퍼스 목적
+
+> "현재 프로젝트에서 docs폴더를 분석해서 사용자의 요구 내용을 찾아서 분류가 가능한지? /team 20명 최대 투입"
+
+> "다시 질문"
+
+> "진행"
+
+> "이 목적이 뭘까?  Step2에서 사용자의 의도를  그 동안 프로젝트를 통하여 분류하기 위한 것인데"
+
+> "사용자의 요청사항을 분류하기 위해서 embedding 에 사용하기 위한것"
+
+> "기록하고 세션 정리를 위해서 커밋 푸쉬"
+
+---
+
 ## 2026-06-13 (KST) — user_instruction_recording.md PWM-VV 배포 실패 진단 + α 옵션 2 ("지시용 — 기록 금지") 적용
 
 > "C:\Temp\PWM-VV\docs\claude_guideline\user_instruction_recording_live_v2.md 에 왜 기록  C:\Temp\PWM-VV\docs\user_instructions 에 기록해야 하는데
