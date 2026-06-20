@@ -71,14 +71,60 @@
 
 ---
 
+## [ ] 합의 3 — Timer / Thread 룰 보강
+
+현재 `coding/ros2.md` 의 timer 규약은 §2.4 파라미터 예시의 `publish_rate_hz` 한 줄뿐이고, Thread/Executor 는 §3.3 에 있으나 timer 특화 룰 부재. 다음 보강:
+
+### §2.x Timer 인벤토리 표 (신설)
+
+`docs/<pkg>/interfaces.md` 의 Lifecycle 표 앞에 추가:
+
+| # | 이름 | 주기 | callback | callback group | clock source | 기능 | 설명 | 위치 |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `control_tick` | 20 Hz (50 ms) | `on_control_cb` | `ctrl_cb_group` (ReentrantCallbackGroup) | use_sim_time=True → `/clock` | 제어 루프 주기 | `/cmd_vel` 산출 — base_driver 가 구독 | `ctrl_node.cpp:120` |
+
+- 주기 단위 접미사 의무 (`_hz`, `_ms`, `_us`) — 상위 README §4.2 정렬
+- clock source: wall / steady / system / ROS clock (use_sim_time 활성 시) 명시
+- callback group 미지정 = 디폴트 group — 명시 의무
+
+### §3.3 (또는 §3.x) Timer 룰 보강
+
+- Timer 도 callback 이므로 §3.3 callback group 배정 의무 동일 적용 — 미지정 시 long-running timer 가 다른 callback 을 직렬화 차단
+- `use_sim_time` 활성 환경에서는 wall_timer 대신 ROS clock 기반 timer 사용 (`create_timer(node->get_clock(), ...)` rclcpp / `create_timer(...)` rclpy). wall_timer 는 sim time 무시 → 시뮬에서 실시간으로 발화
+- 주기 budget: 콜백 실행 시간 < 주기 × 0.7 권장 (jitter 여유). 초과 시 별도 ReentrantCallbackGroup 또는 worker thread 분리 — §3.3 long-running 룰 연장
+- Timer 정지 / 재시작 lifecycle 명시 — node 소멸 시 timer 누수 방지
+
+### §3.x 외부 Thread / Publisher Thread-Safety (신설)
+
+- rclcpp publisher/subscriber 메서드는 thread-safe 보장 — 그러나 사용자 콜백·shared state 는 보호 필요 ([coding/concurrency.md](concurrency.md) §3.1 정렬)
+- 외부 `std::thread` 또는 worker pool 에서 publish 호출 허용. 다만 동일 publisher 를 다중 thread 가 호출할 때 **메시지 순서 무보장** — 큐잉 또는 단일 publisher thread 권장
+- `spin_some` / `spin_once` 와 `executor.spin()` 혼용 금지 — 메인 루프 polling vs 전용 spin thread 중 하나만 선택
+
+### 연관 보완
+
+- **§4 A 체크리스트**:
+  - "Timer 인벤토리 표 §2.x 갱신"
+  - "Timer 주기 단위 접미사 (`_hz`, `_ms`) 명시"
+  - "Timer callback 차단성 검토 (실행 시간 < 주기 × 0.7)"
+  - "use_sim_time 환경에서 wall_timer 사용 없음"
+- **§5 평가 태그**:
+  - `[timing]` — concurrency.md 와 공유 (jitter, budget 초과)
+  - `[clock]` — sim time / wall / ROS clock 불일치 (신설)
+- **§7 자체 점검 grep**:
+  - `grep -rEn 'create_wall_timer\|create_timer' src/` — 인벤토리 누락 검출
+  - `grep -rEn 'wall_timer' src/` + use_sim_time 활성 여부 cross-check
+
+---
+
 ## 다음 세션 진입 순서
 
 1. `git -C kuks_claude_setup checkout docs/ros2-interface-audit-sop`
 2. 본 문서 읽기 — 합의 사항 확인 (project memory `project_pending_ros2_audit_followups` 과 동일 내용)
 3. `kuks_claude_setup_new/claude_guideline/coding/ros2.md` 편집:
-   - §3.9 신설 (§3.8 micro-ROS 뒤에 추가)
-   - §8.2 산출물 표·§8.3.2 P3 명령·§8.8 B 체크리스트 보강 (rqt_graph)
-   - §4 A 체크리스트·§5 평가 태그·§7 grep 보강 (§3.9 연관 보완)
+   - §3.9 신설 (§3.8 micro-ROS 뒤에 추가) — 합의 1
+   - §8.2 산출물 표·§8.3.2 P3 명령·§8.8 B 체크리스트 보강 — 합의 2 (rqt_graph)
+   - §2.x Timer 인벤토리 표 신설 + §3.3 Timer 룰 보강 + §3.x 외부 thread 정책 — 합의 3
+   - §4 A 체크리스트·§5 평가 태그·§7 grep 보강 — 합의 1·3 연관 보완 통합
 4. repo 로 cp → `git add claude_guideline/coding/ros2.md` 단일 파일 → commit (`feat(claude_guideline):` prefix) → push
 5. 본 문서의 해당 체크박스 표시 또는 제거 → `git add docs/followups/ros2-interface-audit-sop.md` → commit → push
-6. 두 합의 모두 완료되면 본 문서 삭제 + 메모리 갱신
+6. 세 합의 모두 완료되면 본 문서 삭제 + 메모리 갱신
