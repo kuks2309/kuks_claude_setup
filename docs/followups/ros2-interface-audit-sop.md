@@ -116,15 +116,43 @@
 
 ---
 
+## [ ] 합의 4 — §8 ROS2 인터페이스 감사 SOP 의 v3 번들 이식 (★ v3_porting_sop.md §5.3 backfill)
+
+v1/v2 `coding/ros2.md` 의 §8 인터페이스 감사 SOP + §2 인벤토리 (기능/설명 열 포함) + §8.5 QoS 매트릭스 + §8.6 연결 맵 (토픽/서비스/TF) + §8.7 불일치 보고 + §8.8 체크리스트 를 v3 `kuks_claude_skill_setup/coding/` 번들로 이식. v3_porting_sop.md §3 절차 + §2 매핑 규약 적용.
+
+### 분해 계획
+
+| v1/v2 부분 | v3 위치 |
+|---|---|
+| §2 인벤토리 양식 + §8.1~§8.4 절차 | `coding/domains/ros2-coding.md` 본문 (코드 작성 + 감사 양면) |
+| §8.5 QoS 매트릭스 + §8.6 연결 맵 + §8.7 불일치 + §8.8 체크리스트 | `coding/domains/ros2-coding.md` 의 감사 SOP 절 |
+| §7·§8.8 자체 점검 grep | `coding/checks/ros2-coding.sh` (실행 가능 스크립트) |
+| CLAUDE.md 등록 포인터 한 줄 | `coding/claude.snippet.md` 의 ros2 도메인 라인 추가 (마커 `kuks_agent_setup:coding`) |
+| 설치 절차 | `coding/install.sh` 의 도메인 선택 인자에 `ros2-coding` 포함 |
+
+### 블로커
+
+- `kuks_claude_skill_setup/coding/` 전체가 untracked (8+ 파일 미커밋) — 번들 자체 commit 이 선행돼야 함
+- `coding/domains/ros2-coding.md` 가 현재 untracked, v1/v2 §8 SOP 미반영
+- 합의 1~3 (§3.9 / rqt_graph / Timer/Thread) 가 v1/v2 에 먼저 반영된 후 v3 이식이 자연스러움 — 본 합의는 합의 1~3 이후 단계
+
+### 이식 후
+
+- v3 양 remote (origin = kuks_claude_agent_setup + fito = FITO_claude_skill_install) 모두 push — `remote_push_policy.md` §1.3 적용
+- 합의 1~3 의 v1/v2 변경분도 동일 절차로 v3 에 동기
+
+---
+
 ## 다음 세션 진입 순서
 
 1. `git -C kuks_claude_setup checkout docs/ros2-interface-audit-sop`
-2. 본 문서 읽기 — 합의 사항 확인 (project memory `project_pending_ros2_audit_followups` 과 동일 내용)
+2. 본 문서 + `v3_porting_sop.md` 읽기 — 합의 사항 확인 (project memory `project_pending_ros2_audit_followups` 과 동일 내용)
 3. `kuks_claude_setup_new/claude_guideline/coding/ros2.md` 편집:
    - §3.9 신설 (§3.8 micro-ROS 뒤에 추가) — 합의 1
    - §8.2 산출물 표·§8.3.2 P3 명령·§8.8 B 체크리스트 보강 — 합의 2 (rqt_graph)
    - §2.x Timer 인벤토리 표 신설 + §3.3 Timer 룰 보강 + §3.x 외부 thread 정책 — 합의 3
    - §4 A 체크리스트·§5 평가 태그·§7 grep 보강 — 합의 1·3 연관 보완 통합
-4. repo 로 cp → `git add claude_guideline/coding/ros2.md` 단일 파일 → commit (`feat(claude_guideline):` prefix) → push
-5. 본 문서의 해당 체크박스 표시 또는 제거 → `git add docs/followups/ros2-interface-audit-sop.md` → commit → push
-6. 세 합의 모두 완료되면 본 문서 삭제 + 메모리 갱신
+4. v1 sync — repo 로 cp → `git add claude_guideline/coding/ros2.md` 단일 파일 → commit (`feat(claude_guideline):` prefix) → push
+5. v3 이식 — `kuks_claude_skill_setup/coding/` 번들로 분해 이식 (합의 4): `domains/ros2-coding.md` + `checks/ros2-coding.sh` + `claude.snippet.md` + `install.sh` 갱신 → 양 remote (origin + fito) push
+6. 본 문서의 합의 1~4 체크박스 갱신 → `git add docs/followups/ros2-interface-audit-sop.md` → commit → push
+7. 네 합의 모두 완료되면 본 문서 삭제 + 메모리 갱신
