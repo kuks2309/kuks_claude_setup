@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-06-21 (KST) — 다중 원격 저장소 동기 정책 SSOT (remote_push_policy.md) 신설 + CLAUDE.md 진입표 등록
+
+> "푸쉬는 kuks2309라 fito에 둘다 올리는거 알죠?"
+
+> "https://github.com/kuks2309/kuks_claude_agent_setup"
+
+> "https://github.com/FitoControl/FITO_claude_skill_install"
+
+> "kuks_claude_agent_setup 이 /home/amap/Project/claude_code/kuks_claude_skill_setup과 관련이 있는데"
+
+> "그리고 /home/amap/Project/claude_code/kuks_claude_skill_setup을 피토에 넣어야 하고"
+
+> "이 것에 대한 규칙을 만들어주세요."
+
+> "claude.md도 넣어야 하지 않는지?"
+
+> "기록 커밋 푸쉬"
+
+---
+
 ## 2026-06-21 (KST) — ROS2 인터페이스 감사 SOP 후속 합의 3 (Timer/Thread 룰) 등록 + docs/followups 파일 갱신
 
 > "합의사항은 기록하고 다음 세션에서 진행할 수 있도록 해주세요."
