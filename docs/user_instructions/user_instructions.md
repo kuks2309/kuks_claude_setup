@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-21 (KST) — v3 번들 이식 SOP (v3_porting_sop.md) 신설 + 프로젝트 목적 정정 + 메모리·CLAUDE.md backfill
+
+> "https://github.com/FitoControl/FITO_claude_skill_install 에  ROS2관련 규칙이 없는데요?"
+
+> "지금까지 만든 ros2  규칙이 왜 kuks_claude_skill_setup 에 없는지?"
+
+> "기존에  kuks_claude_setup 와  kuks_claude_setup_new를 다시 수정 보완해서 kuks_claude_skill_setup에 이식하는것이 이프로젝트의 목적인데"
+
+> "이 목적을 기록하고 여기에 위배되지 않도록 단단히 룰을 구축하고 잘못된 부분은 바로 잡아주세요"
+
+---
+
 ## 2026-06-21 (KST) — 다중 원격 저장소 동기 정책 SSOT (remote_push_policy.md) 신설 + CLAUDE.md 진입표 등록
 
 > "푸쉬는 kuks2309라 fito에 둘다 올리는거 알죠?"
