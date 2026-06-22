@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-06-21 (KST) — v3 이식 follow-up 3건 등록 (§4 종료 게이트 compliance backfill)
+
+> "/home/amap/Project/claude_code/kuks_claude_skill_setup 에 이식이 되었죠?"
+
+> "진행해주세요."
+
+> "기록 커밋 푸쉬 세션조욜해호됨?"
+
+---
+
 ## 2026-06-21 (KST) — v3 번들 이식 SOP (v3_porting_sop.md) 신설 + 프로젝트 목적 정정 + 메모리·CLAUDE.md backfill
 
 > "https://github.com/FitoControl/FITO_claude_skill_install 에  ROS2관련 규칙이 없는데요?"
