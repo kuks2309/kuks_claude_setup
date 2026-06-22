@@ -37,6 +37,7 @@ v2 작성은 [[feedback-v1-v2-migration-workflow]] §1, v1 sync 는 §2, v3 이�
 |---|---|
 | `claude_guideline/coding.md` 또는 `claude_guideline/coding/*.md` | `coding/` |
 | `claude_guideline/code_review.md` | `code_review/` |
+| `claude_guideline/sw_structure.md` | `sw_structure/` |
 | `claude_guideline/external_reference_handling.md` | `external_reference/` |
 | `claude_guideline/user_instruction_recording.md` | `user_instruction/` |
 | `claude_guideline/github.md` 또는 `claude_guideline/remote_push_policy.md` | `git_workflow/` |
