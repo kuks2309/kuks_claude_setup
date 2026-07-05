@@ -24,6 +24,7 @@ mkdir -p "$TARGET_DIR/local" "$TARGET_DIR/hooks"
 FILES=(
   "README.md"
   "github.md"
+  "git_workflow.md"
   "coding.md"
   "workflow.md"
   "documentation.md"

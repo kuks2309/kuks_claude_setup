@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.9.0 — 2026-07-05
+
+Git 커밋·푸시 워크플로 규칙 `git_workflow.md` 를 진입점에 신규 추가 (멀티 세션 커밋 안전 심화). `kuks_claude_skill_setup` 의 `git_workflow` 번들(v1.4.0)을 SSOT 규칙본으로 반영.
+
+### 변경
+
+- `claude_guideline/git_workflow.md` **신규**: solo/team 모드 판정(README 기록 우선·미선언 시 문의·기록), 세션 격리 staging(멀티 세션이 working tree 공유 시 이번 세션 파일만), 세션 격리 훅(track/reminder/stage-gate — 타 세션 미커밋 파일 캡처 하드 차단), 다중 원격 미러, GitHub 정책 강제(선택). 훅은 규칙이 아닌 실행 도구라 SSOT 는 규칙만 배포하고 훅은 `git_workflow` 번들 install.sh 로 다운스트림 설치.
+- `claude_guideline/README.md` §진입점: `git_workflow.md` 행(3+, ★) 추가.
+- `claude_guideline/install.sh` FILES[]: `git_workflow.md` 배포 대상 추가.
+
+### 트리거
+
+사용자 요청 (2026-07-05): "kuks_claude_skill_setup 의 (git_workflow) 수정 내용은 반영되어야지" — 번들에서 완성한 git_workflow v1.4.0 을 SSOT 저장소 가이드라인으로 반영. 배경: VSCode 한 창의 다중 Claude 탭이 단일 working tree 를 공유해 한 세션의 `git add` 가 타 세션 미커밋 파일을 캡처하는 레이스 실증 → 세션 격리 규칙·훅 정립.
+
+### 미결 (다음)
+
+- 기존 `github.md`(커밋/푸쉬/PR)와 `git_workflow.md` 의 **역할분담·정합** (중복 정리).
+- 세션 격리 훅(Python + settings.json 등록)을 본 SSOT 의 hooks 배포 모델(shell + curl)에 맞춰 통합할지 결정.
+
+### 호환성
+
+minor bump (1.8.7 → 1.9.0). 규칙 추가만 — 기존 가이드라인·구조 변경 없음. 다운스트림은 `update.sh` 로 `git_workflow.md` 보충.
+
 ## 1.8.6 — 2026-05-11
 
 docs/ 표준 폴더 전체를 install/update 자동 생성 대상으로 확장 + "빈 폴더 금지" 정책 폐기. 이전까지 v1.8.5 의 SOP 의존 3개 폴더만 자동 생성되었으나, SOP 가 의존하지 않는 일반 카테고리 폴더 (architecture / usage / issues_and_fixes / assets / code_review / refactoring / analysis / test / troubleshooting / api) 도 신규 프로젝트에서 사용자가 수동 mkdir 해야 했던 마찰 해소.
