@@ -24,6 +24,7 @@
 | 9 | v3 이식은 이번 세션 **비범위** — followups 합의 4 에 등록만 | 기존 합의 4 규약 유지 |
 | 10 | **dead reckoning 상대 변위 원칙** — 절대 위치 투영 금지 | "절대 위치를 쓰면 원점과 동떨어진 곳에서 odom 이 생성됨" |
 | 11 | **로컬 이슈 기록 마이닝 반영** — T-Robot_nav 이슈 130여 건에서 설계 룰 6건 실증·신규 룰 7건 채택 (§13) | "doc 를 보면 개발이력과 claude 의 실수 등이 다 나와있으므로 이것을 먼저 봐야 함" |
+| 12 | **원격 TR_Nav 이력 마이닝 반영** — tc 원격 기록 251건에서 실증 5건(V7~V11)·신규 룰 6건(E8~E13) 추가 채택 | "원격 프로젝트 개발 이력을 보고 ros2 skill 을 upgrade 할 수 있어야 함" |
 
 ## 3. 전체 구조
 
@@ -51,7 +52,7 @@ kuks_claude_setup_new/claude_guideline/coding/
 - **§1 트리거**: `nav2_*`·`slam_toolbox`·`robot_localization` 의존, `/cmd_vel` 발행, `nav_msgs` 사용 등 1개 충족 시 활성.
 - **§2 문서 성격 + 산업 4원칙** (§4 내용, 자율주행 예시).
 - **§3 계층 정의 + 노드↔계층 매핑 표**: 인지(센서 드라이버·전처리·인식·위치추정) / 판단(경로계획·행동결정·작업관리) / 제어(경로추종·속도제어·모터 드라이버 IF(Interface)). "한 노드 = 한 계층" 원칙, 위반 시 ADR. 표 양식: `노드 | 계층 | 입력 토픽 | 출력 토픽 | 근거`.
-- **§4 인지 룰**: 센서 입력 BEST_EFFORT(`ros2.md` §3.1 정렬), 출력 msg 에 `header.stamp`(센서 원본 시각 유지)·`frame_id` 의무, 처리 지연 예산 파라미터화, TF lookup timeout·extrapolation 정책 명시.
+- **§4 인지 룰**: 센서 입력 BEST_EFFORT(`ros2.md` §3.1 정렬), 출력 msg 에 `header.stamp`(센서 원본 시각 유지)·`frame_id` 의무, 처리 지연 예산 파라미터화, TF lookup timeout·extrapolation 정책 명시. **[E8]** 스캔매칭 오도메트리는 모션 prior(DR) 공급 의무(`guess_frame_id`) — prior 없는 blind 매칭은 처리 공백 시 가짜 국소최소에 수렴. 처리율(발행률) 모니터 항목화. **[E9]** 융합 노드는 보정 소스 신선도 감시 수단(`last_loc_t_`·타이머) 보유 의무 — 소스 死 시 침묵 강등(예측만 무한 발행) 금지, degraded 플래그 또는 발행 중단. **[E10]** 캐시 데이터 age 게이트 의무 — stale 데이터를 정상 품질 라벨(FUSED 등)로 위장 발행 금지.
 - **§4.x 오도메트리 룰 (인지 하위절, ★ 사용자 최다 빈발 문제 반영)**:
   1. **위치는 엔코더 누적 카운트 차분으로** — pose 증분 = Δticks × 거리/틱. 속도 샘플 `v·Δt` 적분으로 pose 산출 **금지** (지터·드롭·필터 지연이 위치에 영구 누적). **명령 속도 적분(open-loop)은 절대 금지**. twist 는 카운트 차분의 미분으로 채움. 카운터 오버플로/랩어라운드 처리 명시. 펌웨어→호스트 IF 는 **누적 카운트 보고 의무** (속도만 보고하는 설계 = 위반, 임베디드 도메인 연계).
   2. **상대 변위 누적 (dead reckoning 원점 원칙)** — 기동 시 엔코더 카운트 baseline 을 캡처하고 이후 Δ만 누적, odom pose 는 기동 시점 (0,0,0) 에서 시작. 드라이버의 수명 누적 카운트·절대 위치값을 pose 로 직접 투영 **금지** (odom 이 원점과 동떨어진 곳에서 생성되는 원인). 절대(전역) 위치 정렬은 `map→odom` 보정 소관 — GPS(Global Positioning System)·마커 등 절대 위치를 odom 에 직접 주입하는 것도 위반.
@@ -62,8 +63,8 @@ kuks_claude_setup_new/claude_guideline/coding/
   7. **드리프트 예산** — 주행거리 대비 허용 드리프트 수치화, localization 보정 커버 검증.
   8. **twist 프레임 규약** — odometry twist 는 child frame(`base_footprint`) 기준 (REP(ROS Enhancement Proposal) 105).
 - **§5 판단 룰**: 상태기계/BT(Behavior Tree) 전이 문서화 의무, 모든 대기 상태 timeout+fallback(무한 대기 금지), 인지 입력 스테일 검출·안전 동작. **재계획 트리거 열거 의무** — `경로 봉쇄 확정 / 목표 변경 / 운영자 지시` 등 열거 이벤트에서만 재계획, 매 주기·타이머 상시 재계획 **금지**. Nav2 사용 시 BT XML 감사 의무(`RateController`+`ComputePathToPose` 상시 루프 = 위반). 고정 경로/노드-엣지 그래프 기본, 자유공간 계획은 ADR.
-- **§6 제어 룰**: 고정 주기 timer 루프(콜백 즉발 제어 금지), 상위 명령 스테일 시 정지 발행(deadman/watchdog), 속도·가속 클램프 파라미터화+단위 주석, 종료·예외 시 0 명령 보장(fail-safe). **[E3]** 전 명령 경로에 rate limiter/가감속 프로파일 의무 — 명령 변화율을 모터 물리 능력(기어비·profile velocity 환산)과 대조 검증, 일부 경로만 smoothing 되는 비대칭 금지. **[E4]** 제어 루프의 위치 소스는 루프 주기에 정합하는 갱신률 의무 — 저주기(예: 1Hz) 절대 pose 토픽을 고주기 루프에 직결 금지, tf2 체인 lookup(`map→base_link`)으로 고주기 위치 획득.
-- **§7 안전·진단 (cross-cutting)**: E-stop 경로만 계층 우회 직결 허용, diagnostics 발행 의무 노드 규정, heartbeat 감시. **[E7]** 안전장치(watchdog·jump 검출 등) 비활성화는 기한·복원 조건·조사 항목 명시 + 부채 추적 의무 — 주석만 남기고 방치 금지.
+- **§6 제어 룰**: 고정 주기 timer 루프(콜백 즉발 제어 금지), 상위 명령 스테일 시 정지 발행(deadman/watchdog), 속도·가속 클램프 파라미터화+단위 주석, 종료·예외 시 0 명령 보장(fail-safe). **[E3]** 전 명령 경로에 rate limiter/가감속 프로파일 의무 — 명령 변화율을 모터 물리 능력(기어비·profile velocity 환산)과 대조 검증, 일부 경로만 smoothing 되는 비대칭 금지. **[E4]** 제어 루프의 위치 소스는 루프 주기에 정합하는 갱신률 의무 — 저주기(예: 1Hz) 절대 pose 토픽을 고주기 루프에 직결 금지, tf2 체인 lookup(`map→base_link`)으로 고주기 위치 획득. **[E13]** 드라이버 피드백 staleness 가드 — 필드버스 피드백 값을 타이머로 재발행하는 구조는 byte-동결 검출 시 안전측(0) 발행.
+- **§7 안전·진단 (cross-cutting)**: E-stop 경로만 계층 우회 직결 허용, diagnostics 발행 의무 노드 규정, heartbeat 감시. **[E7]** 안전장치(watchdog·jump 검출 등) 비활성화는 기한·복원 조건·조사 항목 명시 + 부채 추적 의무 — 주석만 남기고 방치 금지. **[E11]** 안전 체인 런타임 검증 의무 — 파라미터는 기동 시 1회 로드(빌드·설치 ≠ 실행 노드 반영), `ros2 param get`+구독 수 확인, 주기적 페일세이프 방향 주입 테스트. 신선도 감시 신호는 "발행이 멈추는 신호"로 선정 (stamp 만 갱신되고 값이 동결되는 함정 신호 배제).
 - **§8 표준 디폴트 vs 산업 룰 대조표**:
 
 | # | 표준 스택 디폴트 | 산업 룰 |
@@ -119,7 +120,7 @@ kuks_claude_setup_new/claude_guideline/coding/
 3. **§8 합의 2 (rqt_graph) 반영 — 3개소**: §8.2 산출물 표에 `docs/rqt_graph.png` 1행, §8.3.2 P3 명령에 `rqt_graph` 1줄, §8.8 B 체크리스트에 정합 항목 1개 (followups 문서의 스펙 그대로).
 4. **§3.4 파라미터 보강 [E2]**: 코드 내 기본값과 YAML 값의 이원화 금지 — 코드 디폴트↔파라미터 파일 동기 검증 항목·grep 추가.
 5. **종료·수명 위생 절 신설 [E5]**: `shutting_down` 플래그 규약(타이머·콜백의 소멸 중 접근 차단), 종료 시 정지 명령 발행, launch 자식 프로세스는 세션(SID) 단위 종료(`pkill -s`), 종료 후 잔존 프로세스 검증. (절 번호는 합의 1 의 §3.9 와 정렬해 구현 시 확정)
-6. **DDS(Data Distribution Service) 운영 절 신설 [E6]**: participant 한도를 노드 수 계획과 대조 설계, daemon 캐시 유령 노드 리셋 절차(`ros2 daemon stop/start`), discovery 설정 명시.
+6. **DDS(Data Distribution Service) 운영 절 신설 [E6·E12]**: participant 한도를 노드 수 계획과 대조 설계, daemon 캐시 유령 노드 리셋 절차(`ros2 daemon stop/start`), discovery 설정 명시. 멀티 로봇: `CYCLONEDDS_URI` 전 노드 강제(인터페이스 바인딩)·함대 `ROS_DOMAIN_ID` 분리·와일드카드 DDS 소켓 0 검증(`ss`), 센서 이더넷의 default route 탈취 방지.
 
 ## 9. 반영 절차
 
@@ -167,7 +168,7 @@ kuks_claude_setup_new/claude_guideline/coding/
 
 §12 규약의 의견·증거 누적 절. 본 세션(oem-intel-rvp, 2026-07-18)의 로컬 이슈 기록 마이닝 결과를 V#(실증)/E#(신규 채택)로 등록. 검토 컴 의견은 §12.1 표 형식(R#)으로 아래에 append.
 
-### 13.1 설계 룰 실증 — 출처: 로컬 `T-Robotics/T-Robot_nav_ros2_ws/docs/issues_fixes/issues_and_fixes.md` (2026-02~04, 이슈 130여 건)
+### 13.1 설계 룰 실증 — 출처: 로컬 `T-Robotics/T-Robot_nav_ros2_ws`(2026-02~04, 130여 건, V1~V6) + 원격 `tc:~/Project/kkw/TR_Nav_ros2_ws`(2026-04~07, 251건, V7~V11)
 
 | # | 이슈 (날짜) | 실증된 룰 |
 |---|---|---|
@@ -177,6 +178,11 @@ kuks_claude_setup_new/claude_guideline/coding/
 | V4 | tc_motors 명령 Watchdog 부재 — 상위 crash 시 마지막 명령 무한 전송 (03-24) | §5 제어 deadman |
 | V5 | Spin Action 무한 루프 — 글로벌 타임아웃 부재, 94.9초 연속 회전 (03-16) | §5 판단 timeout |
 | V6 | WCS↔motion 액션 서버명 5개 전부 불일치 — 영구 대기 (03-09) | `ros2.md` §8 감사 SOP |
+| V7 | fused DR 이 encoder count 대신 파생 velocity 재적분 — 드리프트 자기주입, 거리 23% 부풀림 (07-04) | §5 오도메트리 룰 1 (카운트 차분) |
+| V8 | localization 死 → 침묵 dead-reckoning 표류 84초 → 벽근접 사고 (06-15/17) | §5 스테일 검출 + E9 |
+| V9 | watchdog 이 신규 안전 소스 미구독 — 측위 없이 347초 주행 (07-13) | E11 |
+| V10 | 엔코더 피드백 byte-동결 → phantom 적분 폭주 (06-11) | E13 + deadman |
+| V11 | 타 로봇 `/scan_merged` WiFi DDS 유입 → 도킹 오염 (07-09) | E6·E12 |
 
 ### 13.2 신규 룰 채택 (E#)
 
@@ -189,5 +195,11 @@ kuks_claude_setup_new/claude_guideline/coding/
 | E5 | PGID/SID 종료 실패 (02-18) · 종료 시 UAF crash (03-24) · 프로세스 잔존 다수 | 종료·수명 위생 절 | §8-5 |
 | E6 | CycloneDDS participant 한도 초과로 전 노드 crash (02-10) · daemon 캐시 유령 노드 (02-02) | DDS 운영 절 | §8-6 |
 | E7 | pose-jump watchdog "임시 비활성화" 후 복원 조건이 주석뿐 (03-06) | 안전장치 비활성화 관리 | §5 안전·진단 |
+| E8 | icp_odometry 모션 prior 부재 — 876ms 공백 시 가짜 수렴 +147°, 측위 파괴 2건 (07-13) | 스캔매칭 모션 prior 공급 의무 | §5 인지 룰 |
+| E9 | fused 가 보정 소스 死 인지 수단 자체가 없음 — 침묵 강등 (06-17) | 침묵 강등 금지·신선도 감시 수단 의무 | §5 인지 룰 |
+| E10 | stale scan 을 FUSED 품질로 위장 발행 → 무한 공전 (07-02) | 캐시 age 게이트·품질 정직성 | §5 인지 룰 |
+| E11 | 안전 소스 설정이 실행 중 노드에 미반영 — 게이트 미발화 347초 (07-13) | 안전 체인 런타임 검증·주입 테스트 | §5 안전·진단 |
+| E12 | 타 로봇 DDS 유입 (07-09)·LiDAR 이더넷 default route 탈취 (07-01) | 멀티 로봇 DDS/네트워크 격리 | §8-6 |
+| E13 | 드라이버 fb_vel byte-동결을 타이머가 100Hz 재발행 → 폭주 (06-11) | 피드백 staleness 가드 | §5 제어 룰 |
 
 (검토 컴 R# 의견은 이 아래에 append)
