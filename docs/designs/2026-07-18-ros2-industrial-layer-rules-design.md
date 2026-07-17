@@ -23,6 +23,7 @@
 | 8 | **합의 2 (rqt_graph 산출물)** 이번 세션 구현에 포함 | "합의 2 는 진행해야, 중요한데" |
 | 9 | v3 이식은 이번 세션 **비범위** — followups 합의 4 에 등록만 | 기존 합의 4 규약 유지 |
 | 10 | **dead reckoning 상대 변위 원칙** — 절대 위치 투영 금지 | "절대 위치를 쓰면 원점과 동떨어진 곳에서 odom 이 생성됨" |
+| 11 | **로컬 이슈 기록 마이닝 반영** — T-Robot_nav 이슈 130여 건에서 설계 룰 6건 실증·신규 룰 7건 채택 (§13) | "doc 를 보면 개발이력과 claude 의 실수 등이 다 나와있으므로 이것을 먼저 봐야 함" |
 
 ## 3. 전체 구조
 
@@ -61,8 +62,8 @@ kuks_claude_setup_new/claude_guideline/coding/
   7. **드리프트 예산** — 주행거리 대비 허용 드리프트 수치화, localization 보정 커버 검증.
   8. **twist 프레임 규약** — odometry twist 는 child frame(`base_footprint`) 기준 (REP(ROS Enhancement Proposal) 105).
 - **§5 판단 룰**: 상태기계/BT(Behavior Tree) 전이 문서화 의무, 모든 대기 상태 timeout+fallback(무한 대기 금지), 인지 입력 스테일 검출·안전 동작. **재계획 트리거 열거 의무** — `경로 봉쇄 확정 / 목표 변경 / 운영자 지시` 등 열거 이벤트에서만 재계획, 매 주기·타이머 상시 재계획 **금지**. Nav2 사용 시 BT XML 감사 의무(`RateController`+`ComputePathToPose` 상시 루프 = 위반). 고정 경로/노드-엣지 그래프 기본, 자유공간 계획은 ADR.
-- **§6 제어 룰**: 고정 주기 timer 루프(콜백 즉발 제어 금지), 상위 명령 스테일 시 정지 발행(deadman/watchdog), 속도·가속 클램프 파라미터화+단위 주석, 종료·예외 시 0 명령 보장(fail-safe).
-- **§7 안전·진단 (cross-cutting)**: E-stop 경로만 계층 우회 직결 허용, diagnostics 발행 의무 노드 규정, heartbeat 감시.
+- **§6 제어 룰**: 고정 주기 timer 루프(콜백 즉발 제어 금지), 상위 명령 스테일 시 정지 발행(deadman/watchdog), 속도·가속 클램프 파라미터화+단위 주석, 종료·예외 시 0 명령 보장(fail-safe). **[E3]** 전 명령 경로에 rate limiter/가감속 프로파일 의무 — 명령 변화율을 모터 물리 능력(기어비·profile velocity 환산)과 대조 검증, 일부 경로만 smoothing 되는 비대칭 금지. **[E4]** 제어 루프의 위치 소스는 루프 주기에 정합하는 갱신률 의무 — 저주기(예: 1Hz) 절대 pose 토픽을 고주기 루프에 직결 금지, tf2 체인 lookup(`map→base_link`)으로 고주기 위치 획득.
+- **§7 안전·진단 (cross-cutting)**: E-stop 경로만 계층 우회 직결 허용, diagnostics 발행 의무 노드 규정, heartbeat 감시. **[E7]** 안전장치(watchdog·jump 검출 등) 비활성화는 기한·복원 조건·조사 항목 명시 + 부채 추적 의무 — 주석만 남기고 방치 금지.
 - **§8 표준 디폴트 vs 산업 룰 대조표**:
 
 | # | 표준 스택 디폴트 | 산업 룰 |
@@ -107,15 +108,18 @@ kuks_claude_setup_new/claude_guideline/coding/
   명시적 위반 목록: ① `base_footprint` 생략 `odom→base_link` 직결(최다 위반) ② localization 의 `map→base_link` 직접 발행 ③ 센서 frame 을 `odom`/`map` 에 직접 부착 ④ 정적 구간을 코드에서 동적 broadcast ⑤ 한 구간 다중 broadcaster.
 - **§3 시간 원칙**: TF = 시계열 버퍼(lookup 은 시각 보간). 센서 변환은 msg 의 `header.stamp` 로 lookup — `now()` 금지. `Time(0)` vs `now()` 차이, timeout 정책 의무. 미래 시각 발행 금지, 버퍼 보존 기간(기본 10초) 인지.
 - **§4 발행 원칙**: 고정 변환 = static broadcaster(1회·TRANSIENT_LOCAL). 고정 변환 주기 발행 = 위반. URDF 고정 프레임은 `robot_state_publisher` 위임(수동 중복 발행 금지). 동적 TF 는 데이터 생성 시각 stamp.
-- **§5 변환 계산 원칙**: 수동 행렬 곱·역변환 금지 — `lookup_transform`/`doTransform` 이 체인·역변환·보간 담당. `lookup_transform(target, source)` 방향 의미 명시.
+- **§5 변환 계산 원칙**: 수동 행렬 곱·역변환 금지 — `lookup_transform`/`doTransform` 이 체인·역변환·보간 담당. `lookup_transform(target, source)` 방향 의미 명시. **[E1]** 오차·목표·추적값의 단일 frame 원칙 — IMU 상대각·odom·map frame 값 혼용 금지, 혼용 필요 시 명시 변환 후 사용.
 - **§6 다중 로봇**: `frame_prefix` 규약.
 - **§7 체크리스트 + 평가 태그** `[tf-tree]` `[tf-time]` `[tf-static]` `[tf-chain]` **+ grep** (lookup 인접 `now()` 검출, 동일 frame 다중 broadcaster 검출, 표준 체인 대조는 `view_frames` 산출물 + `ros2.md` §8.6.3 교차 참조).
 
-## 8. 기존 ros2.md 수정 목록 (경미)
+## 8. 기존 ros2.md 수정 목록
 
 1. **§6 도메인 의존/충돌**: 신설 3파일 등록 + 트리거·우선순위 관계 명시.
 2. **§3.7 TF/좌표계**: 표면 룰 유지 + 심화 원칙은 `ros2_tf.md` 위임 포인터 1줄.
 3. **§8 합의 2 (rqt_graph) 반영 — 3개소**: §8.2 산출물 표에 `docs/rqt_graph.png` 1행, §8.3.2 P3 명령에 `rqt_graph` 1줄, §8.8 B 체크리스트에 정합 항목 1개 (followups 문서의 스펙 그대로).
+4. **§3.4 파라미터 보강 [E2]**: 코드 내 기본값과 YAML 값의 이원화 금지 — 코드 디폴트↔파라미터 파일 동기 검증 항목·grep 추가.
+5. **종료·수명 위생 절 신설 [E5]**: `shutting_down` 플래그 규약(타이머·콜백의 소멸 중 접근 차단), 종료 시 정지 명령 발행, launch 자식 프로세스는 세션(SID) 단위 종료(`pkill -s`), 종료 후 잔존 프로세스 검증. (절 번호는 합의 1 의 §3.9 와 정렬해 구현 시 확정)
+6. **DDS(Data Distribution Service) 운영 절 신설 [E6]**: participant 한도를 노드 수 계획과 대조 설계, daemon 캐시 유령 노드 리셋 절차(`ros2 daemon stop/start`), discovery 설정 명시.
 
 ## 9. 반영 절차
 
@@ -129,6 +133,7 @@ kuks_claude_setup_new/claude_guideline/coding/
 - v3(`kuks_claude_skill_setup`) 이식 — 합의 4 에 등록만, 실행은 후속 세션.
 - followups 합의 1(§3.9 설정·경로 룰)·합의 3(Timer/Thread 보강) — 기존 추적 유지, 이번 세션 미실행. 단 합의 3 의 timer 룰과 본 설계 제어 룰(고정 주기 루프)은 중복되지 않게 구현 시 교차 참조.
 - 워크스페이스 `docs/claude_guideline/ros2.md`(v1 master 계열 작업 규칙)는 본 설계와 무관 — 수정하지 않음.
+- 이슈 기록 가이드라인 보강(구조적 취약점·재발 조건 기록 규칙 — T-Robot_nav 03-09 메타 교훈)은 ros2 룰 범위 밖 — documentation 가이드라인 후속 후보로만 기록.
 
 ## 11. 검증 계획
 
@@ -157,3 +162,32 @@ kuks_claude_setup_new/claude_guideline/coding/
 1. pull 후 §13 의견을 본문에 반영, 각 항목 `상태` 를 `반영(위치)` / `보류(사유)` 로 갱신
 2. 반영 commit·push → 검토자가 재확인
 3. **종료 조건**: §13 에 `미처리` 0건 → 스펙 확정, 구현(파일 작성) 단계 진입
+
+## 13. 교차 검토·증거 로그
+
+§12 규약의 의견·증거 누적 절. 본 세션(oem-intel-rvp, 2026-07-18)의 로컬 이슈 기록 마이닝 결과를 V#(실증)/E#(신규 채택)로 등록. 검토 컴 의견은 §12.1 표 형식(R#)으로 아래에 append.
+
+### 13.1 설계 룰 실증 — 출처: 로컬 `T-Robotics/T-Robot_nav_ros2_ws/docs/issues_fixes/issues_and_fixes.md` (2026-02~04, 이슈 130여 건)
+
+| # | 이슈 (날짜) | 실증된 룰 |
+|---|---|---|
+| V1 | TF 구조에 `base_footprint` 누락·센서 오프셋 미반영 (02-17) | §7 TF 의무 체인 |
+| V2 | RTAB-Map+Gazebo TF 충돌 — `base_link` 부모 2개, **반복 이슈** (02-09) | §7 broadcaster 유일성 |
+| V3 | 전체 노드간 QoS 불일치 9건 수정 (03-24) 외 4건 | `ros2.md` §3.1 QoS |
+| V4 | tc_motors 명령 Watchdog 부재 — 상위 crash 시 마지막 명령 무한 전송 (03-24) | §5 제어 deadman |
+| V5 | Spin Action 무한 루프 — 글로벌 타임아웃 부재, 94.9초 연속 회전 (03-16) | §5 판단 timeout |
+| V6 | WCS↔motion 액션 서버명 5개 전부 불일치 — 영구 대기 (03-09) | `ros2.md` §8 감사 SOP |
+
+### 13.2 신규 룰 채택 (E#)
+
+| # | 근거 이슈 | 채택 룰 | 반영 위치 |
+|---|---|---|---|
+| E1 | Spin 무한루프의 근본 원인 = IMU/localization frame 혼용 (03-16) · CTE 가 odom/map 차이로 불일치 (02-26) | 오차·목표·추적의 단일 frame 원칙 | §7 (ros2_tf §5) |
+| E2 | sil_predictor 코드 기본값 6건이 YAML 과 발산 → 시뮬↔실차 불일치 (03-27) | 코드 기본값↔YAML 이원화 금지 | §8-4 |
+| E3 | steer rate limit 부재 → 간헐 정지 (02-26) · velocity smoothing 부재 → 충격음 (02-26) | 전 명령 경로 rate limiter + 모터 물리 능력 대조 | §5 제어 룰 |
+| E4 | 1Hz `localization_pose` 를 50Hz 루프에 직결 → 속도 계단 급변 (02-26), tf2 lookup 34Hz 로 해결 | 위치 소스 갱신률 정합 + tf2 체인 lookup | §5 제어 룰 |
+| E5 | PGID/SID 종료 실패 (02-18) · 종료 시 UAF crash (03-24) · 프로세스 잔존 다수 | 종료·수명 위생 절 | §8-5 |
+| E6 | CycloneDDS participant 한도 초과로 전 노드 crash (02-10) · daemon 캐시 유령 노드 (02-02) | DDS 운영 절 | §8-6 |
+| E7 | pose-jump watchdog "임시 비활성화" 후 복원 조건이 주석뿐 (03-06) | 안전장치 비활성화 관리 | §5 안전·진단 |
+
+(검토 컴 R# 의견은 이 아래에 append)
