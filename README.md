@@ -63,6 +63,8 @@ bash docs/claude_guideline/update.sh --auto    # 자동 (patch/minor)
 
 `docs/claude_guideline/local/` 폴더의 프로젝트 고유 override 는 업데이트 시 보존됩니다.
 
+`project-autolearn/` 등 전역(`~/.claude`) 설치 자산은 본 저장소를 `git pull` 한 뒤 해당 폴더의 `install.sh` 를 재실행하여 갱신합니다(재실행 안전 — 파일 덮어쓰기 + 기존 설정 등록은 스킵).
+
 ---
 
 ## English Summary
