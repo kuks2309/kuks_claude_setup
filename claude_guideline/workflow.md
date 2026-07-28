@@ -12,7 +12,7 @@
 - [ ] 외부 vendored / read-only 경로([github.md](github.md))를 건드리는가?
 - [ ] 임의 수정·범위 초과를 하지 않을 것을 확인했는가?
 
-## 작업 종료 전 (9 항목)
+## 작업 종료 전 (10 항목)
 
 - [ ] 사용자가 요청한 작업만 수행했는가?
 - [ ] 요청하지 않은 기능을 추가하지 않았는가?
@@ -21,6 +21,7 @@
 - [ ] 빌드와 기본 동작이 깨지지 않는가?
 - [ ] 변경된 파일이 의도한 작업 범위 내인가? (`git status --short`, `git diff --cached --name-only`)
 - [ ] 사용자 승인 또는 "기록" / "커밋" / "푸쉬" 자연어 단축어 외의 commit/push 를 만들지 않았는가? ([github.md](github.md) §"기록" 명령 처리, §일반 Git 작업 규칙)
+- [ ] **코드를 수정했다면 해당 코드의 `code_updates/` 에 수정 이력을 기록했는가?** 코드 주석에 changelog 성 이력(날짜·버전·이전 값)을 남기지 않았는가? ([coding.md](coding.md) §수정 이력 기록, 위치·형식은 [documentation.md](documentation.md))
 - [ ] **본 작업 중 발생한 실수가 있다면 도메인 실수 기록(예: `docs/claude-mistake/`) 에 남겼는가?**
 - [ ] 본 세션 작업을 `/worklog` 로 `docs/worklog/YYYY/MM/YYYY-MM-DD.md` 에 기록했는가? (커밋 이후 수행 권장 — [../skills/worklog.md](../skills/worklog.md))
 
