@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.9.0 — 2026-07-28
+
+코드 수정 이력의 기록처를 `code_updates/` 로 일원화하고, 코드 주석에 changelog 성 이력을 남기는 것을 금지. 위치 룰(1.8.0)만 있고 코드 작업 절차와 연결되지 않아 수정 이력이 코드 주석에 누적되며 낡은 서술로 오염되던 공백을 수선.
+
+### 변경
+
+- `claude_guideline/coding.md`: **NEW §수정 이력 기록 (code_updates/)** — 코드 수정 완료 시 `code_updates/` 기록 의무, 주석에 changelog 성 이력(날짜·버전·이전 값) 작성 금지, 주석은 현재 코드의 사실만 기술하고 낡은 주석은 삭제·교정, silent bug 가설 이력의 배출구도 동일.
+- `claude_guideline/workflow.md`: 작업 종료 전 체크리스트에 `code_updates/` 기록·주석 changelog 금지 점검 항목 추가 (9 → 10 항목).
+- `claude_guideline/manual.md`: §추정 금지·실측 검증 의 silent bug 가설 이력 보존처를 "코드 또는 모듈 CLAUDE.md" → "해당 코드의 `code_updates/`" 로 정정 (주석 이력 허가증으로 과잉 일반화되던 문구 제거).
+- `claude_guideline/documentation.md`: **NEW §code_updates 기록 형식** — 날짜별 `YYYY-MM-DD_<주제>.md` (변경 빈도 낮으면 단일 로그 역순 누적, 폴더당 한 방식), 최신 위, 필수 4 항목(대상/변경/사유/커밋). `code_updates/` 표 행의 (옵션) 표기 해제 + 의무·형식 링크.
+- `claude_guideline/README.md`: coding.md 행 설명에 "수정 이력 기록" 추가.
+
+### 트리거
+
+사용자 지시 (2026-07-28):
+
+> "해당 코드가 있는 폴더에 docs 폴더에 수정 이력을 병기하라고 지침을 요청했는데 왜 이렇게 해서 오염된 정보로 코드를 이상하게 만드는지"
+
+근본 원인: 1.8.0 이 `code_updates/` 를 문서 배치 계층(documentation.md + audit.sh)에만 성문화하고, 코드 작업 절차 계층(coding.md·workflow.md)에 기록 의무·주석 금지를 연결하지 않음. manual.md 의 "코드 … 에 보존" 문구가 주석 이력을 정당화하는 방향으로 작용.
+
 ## 1.8.7 — 2026-06-03
 
 `hooks/` 에 Stop 훅 `stop_check_abbreviations.py` 추가. 응답에 풀어쓰지 않은 약어가 있으면 정지를 차단하고 "원어(한국어 의미, 약어)" 형태로 풀어쓰도록 강제 — 약어 남용 재발 차단. SessionStart 전용이던 hooks 폴더가 Stop 이벤트(.py)까지 확장됨.
