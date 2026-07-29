@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.10.0 — 2026-07-29
+
+1.9.0 수정 이력 규칙의 SIL(Software-In-the-Loop) 테스트(3 라운드, G12~G17)에서 발견된 결함 6 건 수선 + 주석 규율·인벤토리 갱신 의무 신설 + 주석 changelog 기계 강제층(PostToolUse 훅) 도입.
+
+### 변경
+
+- `claude_guideline/coding.md`:
+  - G12: 낡은 주석 삭제·교정 범위를 "이번 수정이 닿는 선언·함수"로 한정, 범위 밖 오염 주석은 발견 보고 → 승인 시 별도 정리.
+  - G16: 프로젝트 컨벤션이 명시 요구하는 관례 블록(Doxygen `@version` 등) 예외.
+  - **NEW §주석 규율** — 담을 것(물리 제약·수치 근거·의도·외부 제약)/함수 헤더 역할 1 줄/담지 말 것(자명한 what·이력·리뷰어 말 걸기).
+  - **NEW §함수·전역 변수 인벤토리 갱신** — 함수/전역 변수의 추가·삭제·시그니처 변경 시 같은 작업 단위에서 인벤토리 표 갱신 (내부 로직만 변경 시 불요, 최초 생성은 별도 승인 작업).
+- `claude_guideline/documentation.md`:
+  - G13: entry 커밋 항목 자기참조 해소 — 같은 커밋이면 커밋 제목, 분리 커밋이면 코드 커밋 hash.
+  - G14: `code_updates/` 최초 생성 시 README.md 동반 생성.
+  - G15: 파일명 `<주제>` 영문 소문자·언더바 명시.
+  - **NEW §인벤토리 문서** — `architecture/inventory.md` 위치·형식(목적/함수 표/전역 변수 표), 현재 상태 전용(이력 금지). `architecture/` 표 행에 병기.
+- `claude_guideline/workflow.md`: 종료 체크에 인벤토리 갱신 항목 추가 (10 → 11 항목).
+- `claude_guideline/hooks/post_tool_use_check_history_comments.py` (신규, G17): Edit/Write/MultiEdit 로 코드 파일에 추가되는 주석의 이력 패턴(날짜·버전 태그·값 변천 화살표·"기존/이전" 서술어) 검출 시 `{"decision":"block"}` — `code_updates/` 기록으로 유도. `TODO(YYYY-MM-DD)`·NOLINT·noqa·비코드 파일 화이트리스트. 합성 7 케이스 검증 통과.
+- `claude_guideline/hooks/README.md`: §제공 hook 표 + §설치(PostToolUse 훅) 절 추가.
+- `claude_guideline/install.sh`, `update.sh`: `HOOK_FILES` + chmod 대상에 신규 훅 추가.
+
+### 트리거
+
+사용자 지시 (2026-07-28~29):
+
+> "SIL 테스트 해봅시다. 주석 오염에 대한 방지는?"
+> "권장 안으로 하고 설치해서 재 검증해주세요"
+> "특히 주석 부분 강화하고 코드 수정시마다 함수, 변수 테이블을 업데이트 해야 하는데.."
+
+SIL 산출물: 워크스페이스 `kuks_claude_setup_new/dogfooding/code_updates/` (로컬 전용) — TC1 오염 파일 버그 수정 회고, TC3 적대적 주석 경계 판정 6 케이스, TC4 방지 실효층 분석.
+
 ## 1.9.0 — 2026-07-28
 
 코드 수정 이력의 기록처를 `code_updates/` 로 일원화하고, 코드 주석에 changelog 성 이력을 남기는 것을 금지. 위치 룰(1.8.0)만 있고 코드 작업 절차와 연결되지 않아 수정 이력이 코드 주석에 누적되며 낡은 서술로 오염되던 공백을 수선.
