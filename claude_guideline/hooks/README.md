@@ -8,6 +8,7 @@ Claude Code (LLM) 의 SessionStart / PostToolUse / PreToolUse 등의 훅에 등�
 |---------|--------|-----|
 | [session_start_claude_mistake.sh](session_start_claude_mistake.sh) | SessionStart | `claude-mistake/INDEX.md` 의 §메타 패턴 + §미해결 항목 절을 매 세션 시작에 자동 주입 — 동일 카테고리 재발 차단 |
 | [stop_check_abbreviations.py](stop_check_abbreviations.py) | Stop | 응답에 풀어쓰지 않은 약어(JTC·TF·QP 등)가 있으면 Stop 을 차단하고 "원어(한국어 의미, 약어)" 형태로 풀어쓰도록 강제 — 약어 남용 재발 차단 |
+| [post_tool_use_check_history_comments.py](post_tool_use_check_history_comments.py) | PostToolUse (Edit\|Write\|MultiEdit) | 코드 파일에 추가되는 changelog 성 주석(날짜·버전·값 변천·"기존/이전" 서술)을 검출해 차단 — 이력은 `code_updates/` 로 유도 ([coding.md](../coding.md) §수정 이력 기록 강제층) |
 
 ## 설치 — `~/.claude/settings.json`
 
@@ -56,6 +57,34 @@ Claude Code (LLM) 의 SessionStart / PostToolUse / PreToolUse 등의 훅에 등�
 추적 약어 목록은 스크립트 상단의 `ABBREVIATIONS` 배열에서 `(정규식, 풀어쓴 키워드)`
 쌍으로 편집한다. 프로젝트별 머신 종속 절대경로가 필요하면 위 `command` 를 절대경로로
 바꾸고, 그 설정 파일(`.claude/settings.local.json` 등)은 git 추적에서 제외한다.
+
+## 설치 — PostToolUse 훅 (`post_tool_use_check_history_comments.py`)
+
+`PostToolUse` 이벤트에 Edit/Write/MultiEdit matcher 로 등록한다. 코드 파일에 추가된
+주석에서 changelog 성 이력 패턴(날짜·버전 태그·값 변천 화살표·"기존/이전" 서술어)이
+검출되면 `{"decision":"block"}` 으로 사유를 되돌려, 주석을 현재 사실로 교정하고 이력을
+`code_updates/` 에 기록하도록 유도한다. `TODO(YYYY-MM-DD)`(manual.md 형식)·NOLINT·noqa
+와 비코드 파일(.md 등, `code_updates/`·CHANGELOG 경로)은 화이트리스트.
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 docs/claude_guideline/hooks/post_tool_use_check_history_comments.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+검출 패턴·대상 확장자는 스크립트 상단 `PATTERNS` / `CODE_EXTS` 에서 편집한다.
 
 ## 검증
 
