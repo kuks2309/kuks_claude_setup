@@ -90,6 +90,55 @@ audit_project() {
   echo "${C_BLU}[#$N_PROJ] $rel${C_RST}"
   echo "${C_BLU}========================================${C_RST}"
 
+  # 0) 루트 CLAUDE.md 내용 검사 (claude_md.md §6 Variant 차단 — docs/ 없어도 수행)
+  # 소문자 claude.md: Claude Code 가 자동 로드하지 않음
+  local lower_cm; lower_cm=$(find "$proj" -maxdepth 1 -name 'claude.md' -type f 2>/dev/null)
+  if [ -n "$lower_cm" ]; then
+    echo "${C_RED}  [lowercase-claude-md]${C_RST} claude.md — 소문자 파일명은 자동 로드되지 않음. ${C_GRN}CLAUDE.md${C_RST} 로 rename 권고"
+    N_ISSUE+=1
+  fi
+  local cf
+  while IFS= read -r cf; do
+    [ -z "$cf" ] && continue
+    local cf_rel; cf_rel="$(basename "$cf")"
+    # 미치환 템플릿 placeholder ({{...}})
+    local ph
+    ph=$(grep -noE '\{\{[A-Z_]+\}\}' "$cf" 2>/dev/null | head -3 | tr '\n' ' ')
+    if [ -n "$ph" ]; then
+      echo "${C_YEL}  [template-placeholder]${C_RST} $cf_rel — 미치환 placeholder: $ph— 실제 내용 치환 또는 절 정리 권고"
+      N_ISSUE+=1
+    fi
+    # 기한 경과 TODO (날짜 병기 TODO 가 오늘보다 과거)
+    local today; today=$(date +%F)
+    local tl tdate
+    while IFS= read -r tl; do
+      [ -z "$tl" ] && continue
+      tdate=$(echo "$tl" | grep -oE '20[0-9]{2}-[0-9]{2}-[0-9]{2}' | head -1)
+      [ -z "$tdate" ] && continue
+      if [[ "$tdate" < "$today" ]]; then
+        echo "${C_YEL}  [stale-todo]${C_RST} $cf_rel — 기한 경과 TODO($tdate): $(echo "$tl" | cut -c1-60)"
+        N_ISSUE+=1
+      fi
+    done < <(grep -iE 'TODO' "$cf" 2>/dev/null)
+    # 사전 체크된 [X] 보고 양식 (형식적 자기승인 — 검증 전 완료 표시)
+    if grep -qE '^[[:space:]]*[-*][[:space:]]*\[[xX]\]' "$cf" 2>/dev/null; then
+      echo "${C_YEL}  [prechecked-report]${C_RST} $cf_rel — 사전 체크 [X] 보고 양식 검출. 증거 기반 보고(8대 원칙 #8, 파일·줄·출력 인용)로 교체 권고"
+      N_ISSUE+=1
+    fi
+    # 검증 불가 다짐 선언형 체크리스트
+    if grep -qE '^[[:space:]]*[-*][[:space:]]*\[ \].*(다짐|확인했는가)' "$cf" 2>/dev/null; then
+      echo "${C_YEL}  [pledge-checklist]${C_RST} $cf_rel — 다짐 선언형 체크리스트 검출. 검증 불가 항목은 산출물 요구형(작업 경계 점검 절)으로 교체 권고"
+      N_ISSUE+=1
+    fi
+    # snippet-only 골격 부재 (번들 마커는 있으나 H1·핵심 원칙 절 없음)
+    if grep -q '<!-- kuks_agent_setup:' "$cf" 2>/dev/null; then
+      if ! grep -qE '^# ' "$cf" 2>/dev/null || ! grep -q '핵심 원칙' "$cf" 2>/dev/null; then
+        echo "${C_YEL}  [snippet-only-skeleton]${C_RST} $cf_rel — 번들 snippet 만 있고 표준 골격(H1 제목·핵심 원칙 절) 부재. templates/CLAUDE.md.template 골격 추가 권고"
+        N_ISSUE+=1
+      fi
+    fi
+  done < <(find "$proj" -maxdepth 1 \( -name 'CLAUDE.md' -o -name 'claude.md' \) -type f 2>/dev/null)
+
   if [ ! -d "$docs" ]; then
     echo "${C_DIM}  docs/ 없음 — skip${C_RST}"
     return 0
