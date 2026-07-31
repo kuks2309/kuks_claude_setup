@@ -34,10 +34,14 @@ def is_code_file(path):
 
 
 def in_adopting_project(file_path):
+    """Walk up to the repo boundary (.git) only — a nested repo without its own
+    docs/claude_guideline/ is NOT adopting, even inside an adopting workspace."""
     d = os.path.dirname(os.path.abspath(file_path))
     while True:
         if os.path.isdir(os.path.join(d, "docs", "claude_guideline")):
             return True
+        if os.path.exists(os.path.join(d, ".git")):
+            return False
         parent = os.path.dirname(d)
         if parent == d:
             return False

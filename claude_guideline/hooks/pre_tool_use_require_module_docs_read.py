@@ -38,7 +38,9 @@ def is_code_file(path):
 
 def find_module_docs(file_path):
     """Walk up from the edited file: nearest docs/architecture/inventory.md and
-    docs/code_updates/. Stop at (and require) a guideline-adopting project root."""
+    docs/code_updates/. Stop at the adopting project root, or at the first repo
+    boundary (.git) — a nested repo without its own docs/claude_guideline/ is
+    NOT adopting, even inside an adopting workspace."""
     d = os.path.dirname(os.path.abspath(file_path))
     inventory, code_updates, adopting = None, None, False
     while True:
@@ -50,6 +52,8 @@ def find_module_docs(file_path):
             code_updates = cu
         if os.path.isdir(os.path.join(d, "docs", "claude_guideline")):
             adopting = True
+            break
+        if os.path.exists(os.path.join(d, ".git")):
             break
         parent = os.path.dirname(d)
         if parent == d:
