@@ -2,11 +2,12 @@
 
 매 작업 시작 전후에 확인해야 할 항목의 단일 근원.
 
-## 작업 시작 전 (7 항목)
+## 작업 시작 전 (8 항목)
 
 - [ ] 워크스페이스 루트 `CLAUDE.md` 와 관련 SSOT (Single Source of Truth / 단일 근원) 파일을 확인했는가?
 - [ ] 작업 영역에 모듈 CLAUDE.md 가 있다면 먼저 읽었는가?
 - [ ] 관련 이론·매뉴얼·기존 코드를 조사했는가?
+- [ ] **코드 수정이면: 수정 대상 모듈의 인벤토리(`architecture/inventory.md`)와 `code_updates/` 최근 entry 를 읽었는가?** 인벤토리가 없으면 이번 작업에서 수정 파일 범위만큼 생성한다 ([coding.md](coding.md) §함수·전역 변수 인벤토리 갱신)
 - [ ] **동일 영역의 기존 실수 / 이슈 기록을 빠르게 훑었는가?** (`docs/claude-mistake/`, `docs/issues_and_fixes/` 등 — 도메인 폴더 구성에 따름)
 - [ ] 사전 승인이 필요한 변경([coding.md](coding.md) 트리거)에 해당하는가?
 - [ ] 외부 vendored / read-only 경로([github.md](github.md))를 건드리는가?
