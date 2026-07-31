@@ -1,5 +1,62 @@
 # Changelog
 
+## 1.11.0 — 2026-07-29
+
+아래 1.10.0 수정 이력 규칙의 SIL(Software-In-the-Loop) 테스트(3 라운드, G12~G17)에서 발견된 결함 6 건 수선 + 주석 규율·인벤토리 갱신 의무 신설 + 주석 changelog 기계 강제층(PostToolUse 훅) 도입.
+
+### 변경
+
+- `claude_guideline/coding.md`:
+  - G12: 낡은 주석 삭제·교정 범위를 "이번 수정이 닿는 선언·함수"로 한정, 범위 밖 오염 주석은 발견 보고 → 승인 시 별도 정리.
+  - G16: 프로젝트 컨벤션이 명시 요구하는 관례 블록(Doxygen `@version` 등) 예외.
+  - **NEW §주석 규율** — 담을 것(물리 제약·수치 근거·의도·외부 제약)/함수 헤더 역할 1 줄/담지 말 것(자명한 what·이력·리뷰어 말 걸기).
+  - **NEW §함수·전역 변수 인벤토리 갱신** — 함수/전역 변수의 추가·삭제·시그니처 변경 시 같은 작업 단위에서 인벤토리 표 갱신 (내부 로직만 변경 시 불요, 최초 생성은 별도 승인 작업).
+- `claude_guideline/documentation.md`:
+  - G13: entry 커밋 항목 자기참조 해소 — 같은 커밋이면 커밋 제목, 분리 커밋이면 코드 커밋 hash.
+  - G14: `code_updates/` 최초 생성 시 README.md 동반 생성.
+  - G15: 파일명 `<주제>` 영문 소문자·언더바 명시.
+  - **NEW §인벤토리 문서** — `architecture/inventory.md` 위치·형식(목적/함수 표/전역 변수 표), 현재 상태 전용(이력 금지). `architecture/` 표 행에 병기.
+- `claude_guideline/workflow.md`: 종료 체크에 인벤토리 갱신 항목 추가 (10 → 11 항목).
+- `claude_guideline/hooks/post_tool_use_check_history_comments.py` (신규, G17): Edit/Write/MultiEdit 로 코드 파일에 추가되는 주석의 이력 패턴(날짜·버전 태그·값 변천 화살표·"기존/이전" 서술어) 검출 시 `{"decision":"block"}` — `code_updates/` 기록으로 유도. `TODO(YYYY-MM-DD)`·NOLINT·noqa·비코드 파일 화이트리스트. 합성 7 케이스 검증 통과.
+- `claude_guideline/hooks/README.md`: §제공 hook 표 + §설치(PostToolUse 훅) 절 추가.
+- `claude_guideline/install.sh`, `update.sh`: `HOOK_FILES` + chmod 대상에 신규 훅 추가.
+
+### 트리거
+
+사용자 지시 (2026-07-28~29):
+
+> "SIL 테스트 해봅시다. 주석 오염에 대한 방지는?"
+> "권장 안으로 하고 설치해서 재 검증해주세요"
+> "특히 주석 부분 강화하고 코드 수정시마다 함수, 변수 테이블을 업데이트 해야 하는데.."
+
+SIL 산출물: 워크스페이스 `kuks_claude_setup_new/dogfooding/code_updates/` (로컬 전용) — TC1 오염 파일 버그 수정 회고, TC3 적대적 주석 경계 판정 6 케이스, TC4 방지 실효층 분석.
+
+### 호환성
+
+minor bump. **재번호 주의**: 본 항목과 아래 1.10.0 은 `feat/code-review-sop` 에서 각각 1.10.0 / 1.9.0 으로 발행되었으나, master 가 같은 기간 별도의 1.9.0(git_workflow, 2026-07-05)을 발행하여 병합 시 번호가 충돌 → 브랜치 두 항목을 한 단계씩 재번호. 브랜치 계보 설치본(VERSION 1.9.0/1.10.0)은 `update.sh` 재실행으로 1.11.0 동기.
+
+## 1.10.0 — 2026-07-28
+
+(`feat/code-review-sop` 에서 1.9.0 으로 발행 → 병합 시 재번호 — 위 1.11.0 §호환성)
+
+코드 수정 이력의 기록처를 `code_updates/` 로 일원화하고, 코드 주석에 changelog 성 이력을 남기는 것을 금지. 위치 룰(1.8.0)만 있고 코드 작업 절차와 연결되지 않아 수정 이력이 코드 주석에 누적되며 낡은 서술로 오염되던 공백을 수선.
+
+### 변경
+
+- `claude_guideline/coding.md`: **NEW §수정 이력 기록 (code_updates/)** — 코드 수정 완료 시 `code_updates/` 기록 의무, 주석에 changelog 성 이력(날짜·버전·이전 값) 작성 금지, 주석은 현재 코드의 사실만 기술하고 낡은 주석은 삭제·교정, silent bug 가설 이력의 배출구도 동일.
+- `claude_guideline/workflow.md`: 작업 종료 전 체크리스트에 `code_updates/` 기록·주석 changelog 금지 점검 항목 추가 (9 → 10 항목).
+- `claude_guideline/manual.md`: §추정 금지·실측 검증 의 silent bug 가설 이력 보존처를 "코드 또는 모듈 CLAUDE.md" → "해당 코드의 `code_updates/`" 로 정정 (주석 이력 허가증으로 과잉 일반화되던 문구 제거).
+- `claude_guideline/documentation.md`: **NEW §code_updates 기록 형식** — 날짜별 `YYYY-MM-DD_<주제>.md` (변경 빈도 낮으면 단일 로그 역순 누적, 폴더당 한 방식), 최신 위, 필수 4 항목(대상/변경/사유/커밋). `code_updates/` 표 행의 (옵션) 표기 해제 + 의무·형식 링크.
+- `claude_guideline/README.md`: coding.md 행 설명에 "수정 이력 기록" 추가.
+
+### 트리거
+
+사용자 지시 (2026-07-28):
+
+> "해당 코드가 있는 폴더에 docs 폴더에 수정 이력을 병기하라고 지침을 요청했는데 왜 이렇게 해서 오염된 정보로 코드를 이상하게 만드는지"
+
+근본 원인: 1.8.0 이 `code_updates/` 를 문서 배치 계층(documentation.md + audit.sh)에만 성문화하고, 코드 작업 절차 계층(coding.md·workflow.md)에 기록 의무·주석 금지를 연결하지 않음. manual.md 의 "코드 … 에 보존" 문구가 주석 이력을 정당화하는 방향으로 작용.
+
 ## 1.9.0 — 2026-07-05
 
 Git 커밋·푸시 워크플로 규칙 `git_workflow.md` 를 진입점에 신규 추가 (멀티 세션 커밋 안전 심화). `kuks_claude_skill_setup` 의 `git_workflow` 번들(v1.4.0)을 SSOT 규칙본으로 반영.
@@ -22,6 +79,25 @@ Git 커밋·푸시 워크플로 규칙 `git_workflow.md` 를 진입점에 신규
 ### 호환성
 
 minor bump (1.8.7 → 1.9.0). 규칙 추가만 — 기존 가이드라인·구조 변경 없음. 다운스트림은 `update.sh` 로 `git_workflow.md` 보충.
+
+## 1.8.7 — 2026-06-03
+
+`hooks/` 에 Stop 훅 `stop_check_abbreviations.py` 추가. 응답에 풀어쓰지 않은 약어가 있으면 정지를 차단하고 "원어(한국어 의미, 약어)" 형태로 풀어쓰도록 강제 — 약어 남용 재발 차단. SessionStart 전용이던 hooks 폴더가 Stop 이벤트(.py)까지 확장됨.
+
+### 변경
+
+- `claude_guideline/hooks/stop_check_abbreviations.py` (신규): stdin 의 `transcript_path` 로 마지막 assistant 메시지를 읽어 `ABBREVIATIONS` 배열의 `(정규식, 풀어쓴 키워드)` 쌍을 검사. 약어가 풀어쓰기 없이 단독 사용되면 `{"decision":"block","reason":...}` 출력. `stop_hook_active` 가드로 무한 루프 방지. 추적 약어는 스크립트 상단 배열에서 편집.
+- `claude_guideline/hooks/README.md`: §제공 hook 표에 행 추가 + §설치(Stop 훅) 절 + python 자가 검증 예시 추가. §신규 hook 추가 시 형식을 `<event>_<purpose>.{sh,py}` 로 확장.
+- `claude_guideline/install.sh`, `update.sh`: `HOOK_FILES` 배열 + chmod 대상에 `stop_check_abbreviations.py` 추가.
+
+### 트리거
+
+사용자 지시 (2026-06-03):
+
+> "응답 검사 훅을 만들어주세요." (약어를 계속 사용하는 문제 재발 방지)
+> "방금 만든 hook을 upload 할 것" (feat/code-review-sop 브랜치)
+
+근본 원인: 약어 사용 금지 지시에도 습관적으로 약어를 풀어쓰지 않고 사용. 강제 메커니즘(Stop 훅) 부재. China 워크스페이스에서 검증 후 SSOT 에 승격.
 
 ## 1.8.6 — 2026-05-11
 

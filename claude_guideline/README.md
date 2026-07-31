@@ -12,7 +12,7 @@ Claude 가 다운스트림 프로젝트 (ROS2 / 임베디드 / 일반 SW 등) �
 |---|---|---|---|
 | 0 | ★★ | 사용자 지시사항 처리 9단계 SOP (Standard Operating Procedure / 표준 운영 절차, Step 1~9 + ✓ 체크) | [user_instruction_handling_sop.md](user_instruction_handling_sop.md) |
 | 1 | ★ | 작업 절차 체크리스트 (시작/종료 + 펌웨어 플래시 절차) | [workflow.md](workflow.md) |
-| 2 | ★ | 코드 작업 규칙 (금지사항·수정 규칙·상수 분리·사전 승인 트리거) | [coding.md](coding.md) |
+| 2 | ★ | 코드 작업 규칙 (금지사항·수정 규칙·수정 이력 기록·상수 분리·사전 승인 트리거) | [coding.md](coding.md) |
 | 3 | ★ | GitHub 워크플로 (커밋/푸쉬/PR (Pull Request)/기록 요청 처리·vendored 가드) | [github.md](github.md) |
 | 3+ | ★ | Git 세션 격리·협업 모드 (멀티 세션 커밋 안전 — solo/team 모드·세션 격리 staging·staging 게이트. github.md 심화, 정합 예정) | [git_workflow.md](git_workflow.md) |
 | 4 | ★ | 기술 부채 방지 (정공법 우선) | [tech_debt.md](tech_debt.md) |

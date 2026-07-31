@@ -147,7 +147,7 @@
 
 | 폴더 | 역할 | 흡수하는 변종 |
 |---|---|---|
-| `architecture/` | 구조 · 설계 | `sw_structure/`, `sw_structures/`, `sw-architecture/`, `PROJECT_STRUCTURE.md` |
+| `architecture/` | 구조 · 설계 · 인벤토리 (`inventory.md` — §인벤토리 문서) | `sw_structure/`, `sw_structures/`, `sw-architecture/`, `PROJECT_STRUCTURE.md` |
 | `usage/` | 설치 · 실행 · 튜토리얼 | `INSTALLATION.md`, `USER_GUIDE.md`, `run_guide.md`, `usage.md` |
 | `issues_and_fixes/` | 이슈 · 수정 기록 (시간 누적 역순) | `issues-fixes/`, `issues_fixes/` |
 | `user_instructions/` | **사용자가 터미널에 입력한 지시사항의 시간 누적 기록** — 형식은 [user_instruction_handling_sop.md](user_instruction_handling_sop.md) §3 (`> "<원문 인용>"` + `### 처리` + `### 결론/산출물`). 결과 요약·리뷰 보고서·분석 결과는 여기 두지 말 것 → `code_review/` 또는 `analysis/` 로 분리 | — |
@@ -160,7 +160,7 @@
 | `test/` (옵션) | 테스트 시나리오 · 리포트 | `test_scenarios/`, `test_reports/` |
 | `troubleshooting/` (옵션) | 문제 해결 | `TROUBLESHOOTING.md` (단일 파일은 폴더로 승격) |
 | `api/` (옵션) | 수동작성 API 참조 | `API.md` — repo root `api/` 와 택일 |
-| `code_updates/` (옵션) | 코드 변경 로그 — 위치 룰은 아래 ROS2 특칙 참조 | `*_code_updates.md` 평탄 5개+ |
+| `code_updates/` | 코드 변경 로그 (수정 이력) — 위치 룰은 아래 ROS2 특칙, entry 형식은 §code_updates 기록 형식, 기록 의무는 [coding.md](coding.md) §수정 이력 기록 | `*_code_updates.md` 평탄 5개+ |
 | `claude_guideline/` | SSOT install 결과 — **직접 수정 금지**, `update.sh` 로만 갱신 | — |
 | `superpowers/{plans,specs}/` (옵션) | Claude superpowers 워킹스페이스 | — |
 
@@ -189,6 +189,52 @@
 - 단일 패키지 안 코드 변경 → `src/<pkg>/docs/code_updates/`
 - 여러 패키지 동시 영향(공유 메시지 / 액션 인터페이스 변경, QoS 정책 변경 등) → 워크스페이스 `docs/code_updates/`
 - 비-ROS2 단일 repo (라이브러리·도구·문서 워크스페이스) → 그냥 `docs/code_updates/`
+
+### code_updates 기록 형식
+
+수정 이력의 배출구는 `code_updates/` 와 git commit message 다. 코드 주석에는 changelog 성 이력을 남기지 않는다 — 기록 의무와 주석 금지의 SSOT 는 [coding.md](coding.md) §수정 이력 기록.
+
+- 파일 단위: 날짜별 `YYYY-MM-DD_<주제>.md` — `<주제>` 는 영문 소문자·언더바 (§명명 규칙 파일명 규칙). 변경 빈도가 낮은 repo 는 단일 로그 파일에 역순 누적해도 되며, 폴더당 한 방식만 사용한다.
+- 폴더 최초 생성 시 진입점 `README.md`(역할 1 줄 + 본 절 링크)를 함께 생성한다 (§명명 규칙).
+- entry 정렬: 최신이 위 (§누적 정렬).
+- entry 필수 항목 (날짜 형식은 §시각/날짜 형식):
+
+```markdown
+## YYYY-MM-DD HH:MM (KST) — <한 줄 요약>
+
+- 대상: <파일/함수> (`경로:줄`)
+- 변경: <무엇을 어떻게 바꿨는가 — 현재 코드 기준 사실>
+- 사유: <왜 — 버그/요구/실측 근거. 추측 기반 기술 금지 (§인용·근거)>
+- 커밋: <코드 변경 커밋의 hash 또는 제목> (git 저장소인 경우)
+```
+
+- 커밋 항목: entry 를 코드와 **같은 커밋**에 넣으면 hash 를 알 수 없으므로 커밋 제목(subject)을 적는다. entry 를 **후속 커밋**으로 분리하면 코드 커밋의 hash 를 적는다.
+
+### 인벤토리 문서 (함수·전역 변수 표)
+
+모듈의 현재 인터페이스 현황표. 갱신 의무의 SSOT 는 [coding.md](coding.md) §함수·전역 변수 인벤토리 갱신.
+
+- 위치: 해당 모듈 docs 의 `architecture/inventory.md` (ROS2 패키지면 `src/<pkg>/docs/architecture/inventory.md`, 비-ROS2 단일 repo 는 `docs/architecture/inventory.md`).
+- 이력이 아니라 **현재 상태** 문서다 — 과거 시그니처·변경 서사를 남기지 않는다 (이력은 `code_updates/` 담당).
+- 형식:
+
+```markdown
+# <모듈명> 인벤토리
+
+## 목적
+
+<모듈 역할 1~3 줄>
+
+## 함수 표
+
+| 함수 | 시그니처 | 역할 (1 줄) | 파일 |
+|---|---|---|---|
+
+## 전역 변수 표
+
+| 변수 | 타입 | 의미·단위 | 파일 |
+|---|---|---|---|
+```
 
 ## Variant → Canonical 매핑 (audit.sh 자동 적용 대상)
 
