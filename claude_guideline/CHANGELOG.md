@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.14.0 — 2026-08-01
+
+타 PC 작업분(2026-07-31 push, 9bb1555~c137f62 — GitHub 35개 CLAUDE.md 전수 감사 후속 T9-1·T16-1·T13-1·T3-1)의 릴리스 보정. 해당 5 커밋이 VERSION·CHANGELOG 미갱신 상태로 push 되어 다운스트림 update.sh 가 감지하지 못하던 것을 본 entry 로 완결.
+
+### 변경
+
+- `claude_guideline/templates/CLAUDE.md.template`: 구판 5원칙 본문 → claude_md.md §2 "8대 원칙" SSOT 위임 1줄 교체 + 선택 절 4종(독립 프로젝트 선언·보호 자산 목록·도메인 SSOT 표 트리거 열·룰 우선순위 3계층) + 보호 자산 금지 충돌 해제 승인 절차(해제 승인 → 구조 제시 → 승인 후 수정).
+- `claude_guideline/documentation.md`: **NEW §경로 이식성** — 절대 경로 금지·프로젝트 루트 기준 상대 경로·외부 경로 `<placeholder>`·`$HOME` 표기, 실측 로그 인용은 원문 유지 예외.
+- `claude_guideline/audit.sh`: 루트 CLAUDE.md 내용 검사 블록 — variant 6종 자동 감지(`[lowercase-claude-md]`·`[template-placeholder]`·`[stale-todo]`·`[prechecked-report]`·`[pledge-checklist]`·`[snippet-only-skeleton]`). 픽스처 3종 검증(6건 검출·오탐 0).
+- `claude_guideline/claude_md.md`: §6 Variant 차단 표 3행 추가(사전 체크 [X] 보고·다짐 선언형 체크리스트·snippet-only 골격 부재) — audit.sh 룰과 정합.
+
+### 트리거
+
+사용자 지시 (2026-08-01): "리모트에서 다른 pc 에서 개선된 사항을 확인하고 먼저 리스트화 해주세요" → "순서대로 동기화해주세요" — 확인 과정에서 무버전 push 발견, 릴리스 보정 승인.
+
+### 호환성
+
+minor bump. 규칙·검사 추가만 — 다운스트림은 update.sh 로 수신 (templates/ 는 저장소 전용, 설치 대상 아님).
+
 ## 1.13.1 — 2026-07-31
 
 사이클 훅 저장소 경계 오판 수선 + `code_updates/` 폴더 스캐폴드 편입 — 1.13.0 배선 직후 워크스페이스 실전 첫 발동에서 발견.
