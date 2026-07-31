@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.13.1 — 2026-07-31
+
+사이클 훅 저장소 경계 오판 수선 + `code_updates/` 폴더 스캐폴드 편입 — 1.13.0 배선 직후 워크스페이스 실전 첫 발동에서 발견.
+
+### 변경
+
+- `claude_guideline/hooks/pre_tool_use_require_module_docs_read.py`, `stop_check_code_record_reflected.py`: 상위 탐색이 저장소 경계(`.git`)를 넘어 부모 워크스페이스의 `docs/claude_guideline/` 까지 올라가, 자체 이력 체계(CHANGELOG)를 가진 **중첩 비도입 저장소**를 도입 프로젝트로 오판하던 것을 정정 — `.git` 경계에서 탐색 중단 (같은 레벨에 `docs/claude_guideline/` 이 있으면 도입 우선 판정). 경계 케이스 2종 포함 15 케이스 재검증 통과.
+- `claude_guideline/install.sh`, `update.sh`: 표준 폴더 스캐폴드에 `docs/code_updates/` + stub README 추가 — 1.10.0 에서 (옵션) 해제된 의무 폴더가 자동 생성 목록에 빠져 있던 정합 공백 해소.
+
+### 트리거
+
+1.13.0 배선 직후 본 워크스페이스에서 Stop 훅 실전 첫 발동: SSOT 저장소(`kuks_claude_setup`, 루트에 `claude_guideline/` 보유·자체 CHANGELOG 관리) 내부의 install.sh/update.sh 수정을 도입 프로젝트 코드로 오판해 code_updates 기록을 요구. 정탐 구조는 유효했으나 경계 판정 결함 실증.
+
+### 호환성
+
+patch bump. 기존 다운스트림은 update.sh 재실행으로 수신.
+
 ## 1.13.0 — 2026-07-31
 
 "수정 전 읽기 → 수정 → 수정 후 기록" 사이클을 매번 기계 강제하는 훅 2종 추가. 문면·체크리스트(1.12.0)만으로는 세션이 빼먹을 수 있던 사이클을 도구 계층에서 차단.
