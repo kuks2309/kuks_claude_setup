@@ -9,6 +9,8 @@ Claude Code (LLM) 의 SessionStart / PostToolUse / PreToolUse 등의 훅에 등�
 | [session_start_claude_mistake.sh](session_start_claude_mistake.sh) | SessionStart | `claude-mistake/INDEX.md` 의 §메타 패턴 + §미해결 항목 절을 매 세션 시작에 자동 주입 — 동일 카테고리 재발 차단 |
 | [stop_check_abbreviations.py](stop_check_abbreviations.py) | Stop | 응답에 풀어쓰지 않은 약어(JTC·TF·QP 등)가 있으면 Stop 을 차단하고 "원어(한국어 의미, 약어)" 형태로 풀어쓰도록 강제 — 약어 남용 재발 차단 |
 | [post_tool_use_check_history_comments.py](post_tool_use_check_history_comments.py) | PostToolUse (Edit\|Write\|MultiEdit) | 코드 파일에 추가되는 changelog 성 주석(날짜·버전·값 변천·"기존/이전" 서술)을 검출해 차단 — 이력은 `code_updates/` 로 유도 ([coding.md](../coding.md) §수정 이력 기록 강제층) |
+| [pre_tool_use_require_module_docs_read.py](pre_tool_use_require_module_docs_read.py) | PreToolUse (Edit\|Write\|MultiEdit) | 코드 수정 시도 시 그 모듈의 `architecture/inventory.md`·`code_updates/` 를 이번 세션에서 읽지 않았으면 수정 거부 — "수정 전 읽기" 강제층. 인벤토리 부재 모듈은 통과(생성은 Stop 훅 몫). guideline 도입 프로젝트(상위에 `docs/claude_guideline/`)에서만 발동 |
+| [stop_check_code_record_reflected.py](stop_check_code_record_reflected.py) | Stop | 코드를 수정한 턴이 `code_updates/`·`inventory.md` 반영 없이 끝나려 하면 1회 차단 — "수정 후 기록" 강제층. 매 응답 종료 시(턴 단위) 검사, `stop_hook_active` 루프 가드 |
 
 ## 설치 — `~/.claude/settings.json`
 
@@ -85,6 +87,41 @@ Claude Code (LLM) 의 SessionStart / PostToolUse / PreToolUse 등의 훅에 등�
 ```
 
 검출 패턴·대상 확장자는 스크립트 상단 `PATTERNS` / `CODE_EXTS` 에서 편집한다.
+
+## 설치 — 수정전 읽기·수정후 기록 사이클 훅 (2종)
+
+"수정 전 읽기 → 수정 → 수정 후 기록" 사이클([coding.md](../coding.md) §함수·전역 변수 인벤토리 갱신, §수정 이력 기록)을 매번 기계 강제한다. 두 훅 모두 guideline 도입 프로젝트(수정 파일 상위에 `docs/claude_guideline/` 존재)에서만 발동하며, `docs/`·`code_updates/`·`.claude/`·scratchpad 경로와 비코드 파일은 제외한다.
+
+- `pre_tool_use_require_module_docs_read.py` (PreToolUse): 코드 수정 시도 순간, 그 모듈의 인벤토리·`code_updates/` 를 이번 세션 transcript 에서 Read 한 적 없으면 수정을 거부하고 먼저 읽도록 요구. 인벤토리가 아직 없는 모듈은 통과.
+- `stop_check_code_record_reflected.py` (Stop): 매 응답 종료 시(세션 종료 아님), 이번 턴에 코드 수정이 있었는데 같은 턴에 `code_updates/` 또는 `inventory.md` 반영이 없으면 종료를 1회 차단.
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 docs/claude_guideline/hooks/pre_tool_use_require_module_docs_read.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 docs/claude_guideline/hooks/stop_check_code_record_reflected.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ## 검증
 

@@ -50,6 +50,8 @@ HOOK_FILES=(
   "session_start_claude_mistake.sh"
   "stop_check_abbreviations.py"
   "post_tool_use_check_history_comments.py"
+  "pre_tool_use_require_module_docs_read.py"
+  "stop_check_code_record_reflected.py"
 )
 for f in "${HOOK_FILES[@]}"; do
   echo "[+] Downloading hooks/$f"
@@ -59,7 +61,9 @@ done
 chmod +x "$TARGET_DIR/update.sh" "$TARGET_DIR/audit.sh" \
   "$TARGET_DIR/hooks/session_start_claude_mistake.sh" \
   "$TARGET_DIR/hooks/stop_check_abbreviations.py" \
-  "$TARGET_DIR/hooks/post_tool_use_check_history_comments.py"
+  "$TARGET_DIR/hooks/post_tool_use_check_history_comments.py" \
+  "$TARGET_DIR/hooks/pre_tool_use_require_module_docs_read.py" \
+  "$TARGET_DIR/hooks/stop_check_code_record_reflected.py"
 
 # docs/ 표준 폴더 전체 자동 생성 (documentation.md §docs/ 표준 폴더, v1.8.6)
 # 각 폴더에 역할·SSOT 링크를 담은 stub README 자동 배치 (기존 README 는 덮어쓰지 않음)

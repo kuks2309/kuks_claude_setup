@@ -77,6 +77,8 @@ HOOK_FILES=(
   "session_start_claude_mistake.sh"
   "stop_check_abbreviations.py"
   "post_tool_use_check_history_comments.py"
+  "pre_tool_use_require_module_docs_read.py"
+  "stop_check_code_record_reflected.py"
 )
 
 # 백업 (hooks/ 포함)
@@ -114,7 +116,9 @@ done
 chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh" \
   "$SCRIPT_DIR/hooks/session_start_claude_mistake.sh" \
   "$SCRIPT_DIR/hooks/stop_check_abbreviations.py" \
-  "$SCRIPT_DIR/hooks/post_tool_use_check_history_comments.py"
+  "$SCRIPT_DIR/hooks/post_tool_use_check_history_comments.py" \
+  "$SCRIPT_DIR/hooks/pre_tool_use_require_module_docs_read.py" \
+  "$SCRIPT_DIR/hooks/stop_check_code_record_reflected.py"
 
 # docs/ 표준 폴더 전체 보강 (v1.8.6: install.sh 와 동일 정책, 기존 README 는 덮어쓰지 않음)
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
