@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.14.1 — 2026-08-01
+
+사이클 훅 오탐 수선 — 거부/에러로 끝난 tool 호출을 집계에서 제외. reload 검증 실사격에서 실증.
+
+### 변경
+
+- `claude_guideline/hooks/stop_check_code_record_reflected.py`: PreToolUse 게이트가 **거부한** Write/Edit 도 transcript 에 tool_use 로 남아 "코드 수정"으로 집계되던 오탐 제거 — tool_result `is_error` 를 id 매칭으로 걸러 실제 성공한 수정만 집계.
+- `claude_guideline/hooks/pre_tool_use_require_module_docs_read.py`: 대칭 수선 — 거부/에러난 Read 는 내용이 전달되지 않았으므로 읽기 의무 충족으로 인정하지 않음.
+
+### 트리거
+
+reload 적용 확인 실사격(2026-08-01): 읽기 게이트가 Write 를 정상 거부했는데, 같은 턴의 Stop 기록 게이트가 그 **거부된** Write 를 코드 수정으로 집계해 차단 — 파일이 생성된 적 없는 가짜 수정에 이력 entry 를 요구하는 오탐. 합성 5 케이스(오탐 재현 PASS 화·성공 수정 회귀 BLOCK·기록 반영 PASS·거부 Read DENY 유지·성공 Read ALLOW) 검증.
+
+### 호환성
+
+patch bump. 동작 완화는 오탐 경로뿐 — 실제 수정·미독에 대한 강제는 동일.
+
 ## 1.14.0 — 2026-08-01
 
 타 PC 작업분(2026-07-31 push, 9bb1555~c137f62 — GitHub 35개 CLAUDE.md 전수 감사 후속 T9-1·T16-1·T13-1·T3-1)의 릴리스 보정. 해당 5 커밋이 VERSION·CHANGELOG 미갱신 상태로 push 되어 다운스트림 update.sh 가 감지하지 못하던 것을 본 entry 로 완결.
