@@ -63,8 +63,12 @@ def find_module_docs(file_path):
 
 
 def session_touched_paths(transcript_path):
-    """All file paths this session has Read / Edited / Written."""
-    touched = set()
+    """All file paths this session has Read / Edited / Written.
+
+    Denied/errored calls (tool_result with is_error) are excluded — a denied
+    Read never delivered content, so it must not satisfy the read duty."""
+    candidates = {}
+    error_ids = set()
     try:
         with open(transcript_path, encoding="utf-8") as f:
             for line in f:
@@ -77,14 +81,18 @@ def session_touched_paths(transcript_path):
                 if not isinstance(content, list):
                     continue
                 for c in content:
-                    if isinstance(c, dict) and c.get("type") == "tool_use" and \
+                    if not isinstance(c, dict):
+                        continue
+                    if c.get("type") == "tool_use" and \
                             c.get("name") in ("Read", "Edit", "Write", "MultiEdit"):
                         p = (c.get("input") or {}).get("file_path")
                         if p:
-                            touched.add(os.path.abspath(p))
+                            candidates.setdefault(c.get("id"), os.path.abspath(p))
+                    elif c.get("type") == "tool_result" and c.get("is_error"):
+                        error_ids.add(c.get("tool_use_id"))
     except Exception:
         pass
-    return touched
+    return {p for uid, p in candidates.items() if uid not in error_ids}
 
 
 def main():

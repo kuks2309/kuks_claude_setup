@@ -54,7 +54,11 @@ def is_record_path(path):
 
 
 def current_turn_tool_uses(transcript_path):
-    """tool_use items after the last genuine user text message."""
+    """tool_use items after the last genuine user text message.
+
+    Denied/errored calls (their tool_result carries is_error) are excluded —
+    a PreToolUse-denied Write appears in the transcript as tool_use but never
+    modified any file, so counting it would be a false positive."""
     try:
         with open(transcript_path, encoding="utf-8") as f:
             lines = f.readlines()
@@ -82,6 +86,7 @@ def current_turn_tool_uses(transcript_path):
                 if has_text and not has_result:
                     last_user = i
     uses = []
+    error_ids = set()
     for obj in parsed[last_user + 1:]:
         if not obj:
             continue
@@ -90,9 +95,13 @@ def current_turn_tool_uses(transcript_path):
         if not isinstance(content, list):
             continue
         for c in content:
-            if isinstance(c, dict) and c.get("type") == "tool_use":
+            if not isinstance(c, dict):
+                continue
+            if c.get("type") == "tool_use":
                 uses.append(c)
-    return uses
+            elif c.get("type") == "tool_result" and c.get("is_error"):
+                error_ids.add(c.get("tool_use_id"))
+    return [u for u in uses if u.get("id") not in error_ids]
 
 
 def main():
