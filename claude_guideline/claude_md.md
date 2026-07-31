@@ -135,6 +135,9 @@ CLAUDE.md 는 Claude Code 가 프로젝트 작업 시 *자동 로드* 하는 메
 | 본문에 SSOT 룰 직접 복제 (예: 350줄+ 두꺼운 CLAUDE.md) | SSOT 위반, 변경 시 다중 동기화 | docs/claude_guideline/ 링크로 분리 |
 | 8대 원칙 누락 | 거버넌스 표준 미충족 | 누락 원칙 추가 |
 | 모듈 CLAUDE.md 미등록 | 루트가 모듈 존재 모름 | 루트 "모듈 CLAUDE.md" 절에 추가 |
+| 사전 체크된 `[X]` 보고 양식 | 검증 전 완료 표시 — 형식적 자기승인 | 증거 기반 보고(원칙 #8)로 교체 — audit.sh `[prechecked-report]` |
+| 검증 불가 다짐 선언형 체크리스트 | 확인 불가 항목은 게이트 역할 못 함 — 복붙 형해화 | 산출물 요구형(작업 경계 점검 절)으로 교체 — audit.sh `[pledge-checklist]` |
+| snippet-only 골격 부재 (번들 마커만 존재) | 8대 원칙·프로젝트 성격 영구 부재 | 템플릿 골격 추가 — audit.sh `[snippet-only-skeleton]` |
 
 본 프로젝트의 23개 CLAUDE.md 분석에서 발견된 실제 위반 사례:
 
