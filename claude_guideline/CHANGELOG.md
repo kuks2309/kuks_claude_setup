@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.11.1 — 2026-07-31
+
+update.sh 비원자성 결함 수선 — 1.11.0 병합 직후 워크스페이스 실배포 검증에서 발견.
+
+### 변경
+
+- `claude_guideline/update.sh`:
+  - **자기 갱신 원자화**: update.sh 를 FILES 루프의 `curl -o` 직접 덮어쓰기에서 분리 — 실행 중인 스크립트의 inode 를 truncate 하여 중단(line offset 붕괴로 syntax error)을 유발하던 것을 `.new` 다운로드 후 `mv` 교체로 변경 (구 inode 는 실행 중 프로세스가 유지).
+  - **VERSION 기록을 맨 끝으로 이동**: 설치 도중 VERSION 이 먼저 갱신되면 중단된 설치가 "이미 최신"으로 위장되어 재실행이 no-op — 모든 파일 설치 성공 후 `$UPSTREAM_VERSION` 을 마지막에 기록.
+  - VERSION·update.sh 백업은 명시 목록으로 유지.
+
+### 트리거
+
+워크스페이스 1.10.0 → 1.11.0 실전 업데이트 중 실증: update.sh 가 자기 자신을 덮어쓰다 syntax error 로 중단, VERSION 은 이미 1.11.0 기록 → 재실행 "[OK] 이미 최신" no-op, `git_workflow.md` 등 후속 파일 누락 방치.
+
+### 호환성
+
+patch bump. 구판(≤1.11.0) update.sh 로 1.11.1 을 받는 첫 실행은 여전히 구판 코드로 동작하므로, 실패 시 1 회 재실행 (VERSION 이 조기 기록된 경우 VERSION 삭제 후 재실행).
+
 ## 1.11.0 — 2026-07-29
 
 아래 1.10.0 수정 이력 규칙의 SIL(Software-In-the-Loop) 테스트(3 라운드, G12~G17)에서 발견된 결함 6 건 수선 + 주석 규율·인벤토리 갱신 의무 신설 + 주석 changelog 기계 강제층(PostToolUse 훅) 도입.

@@ -65,11 +65,12 @@ FILES=(
   "skill_update.md"
   "user_instruction_handling_sop.md"
   "claude_md.md"
-  "VERSION"
   "CHANGELOG.md"
-  "update.sh"
   "audit.sh"
 )
+# VERSION 과 update.sh 는 원자적 갱신을 위해 스크립트 말미에 별도 처리:
+# - update.sh: 실행 중 자기 덮어쓰기 금지 → .new 다운로드 후 mv 교체
+# - VERSION: 모든 설치 완료 후 마지막 기록 (중단 설치가 최신으로 위장되는 것 방지)
 
 HOOK_FILES=(
   "README.md"
@@ -81,7 +82,7 @@ HOOK_FILES=(
 # 백업 (hooks/ 포함)
 BACKUP_DIR="$SCRIPT_DIR/.backup-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR/hooks"
-for f in "${FILES[@]}"; do
+for f in "${FILES[@]}" VERSION update.sh; do
   if [ -f "$SCRIPT_DIR/$f" ]; then
     cp "$SCRIPT_DIR/$f" "$BACKUP_DIR/$f"
   fi
@@ -179,6 +180,16 @@ write_stub "$PROJECT_ROOT/docs/troubleshooting/README.md" "문제 해결 (troubl
 
 write_stub "$PROJECT_ROOT/docs/api/README.md" "수동작성 API 참조 (api)" \
   "수동 작성 API 문서. 자동생성 API 는 repo root \`api/\` 와 택일."
+
+# 자기 갱신 (원자적): curl -o 직접 덮어쓰기는 실행 중인 본 스크립트의 inode 를
+# truncate 하여 중단을 유발 → .new 로 받은 뒤 mv 교체 (구 inode 는 프로세스가 유지)
+echo "[+] Downloading update.sh (자기 갱신)"
+curl -fsSL "$RAW_URL/update.sh" -o "$SCRIPT_DIR/update.sh.new"
+mv "$SCRIPT_DIR/update.sh.new" "$SCRIPT_DIR/update.sh"
+chmod +x "$SCRIPT_DIR/update.sh"
+
+# VERSION 은 모든 설치가 성공한 뒤 마지막에 기록
+printf '%s\n' "$UPSTREAM_VERSION" > "$SCRIPT_DIR/VERSION"
 
 echo ""
 echo "[OK] 업데이트 완료: $CURRENT_VERSION -> $UPSTREAM_VERSION"
