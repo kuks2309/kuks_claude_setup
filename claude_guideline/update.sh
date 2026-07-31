@@ -124,6 +124,7 @@ chmod +x "$SCRIPT_DIR/update.sh" "$SCRIPT_DIR/audit.sh" \
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 mkdir -p \
   "$PROJECT_ROOT/docs/architecture" \
+  "$PROJECT_ROOT/docs/code_updates" \
   "$PROJECT_ROOT/docs/usage" \
   "$PROJECT_ROOT/docs/issues_and_fixes" \
   "$PROJECT_ROOT/docs/assets" \
@@ -151,6 +152,9 @@ write_stub() {
 
 write_stub "$PROJECT_ROOT/docs/architecture/README.md" "구조 · 설계 (architecture)" \
   "프로젝트 / 워크스페이스의 구조·설계 문서. ROS2 워크스페이스는 [documentation.md](../claude_guideline/documentation.md) §ROS2 특칙 참조."
+
+write_stub "$PROJECT_ROOT/docs/code_updates/README.md" "코드 변경 로그 (code_updates)" \
+  "코드 수정 이력 entry 누적 (최신 위). 형식·위치 SSOT: [documentation.md](../claude_guideline/documentation.md) §code_updates 기록 형식. 기록 의무: [coding.md](../claude_guideline/coding.md) §수정 이력 기록."
 
 write_stub "$PROJECT_ROOT/docs/usage/README.md" "설치 · 실행 · 튜토리얼 (usage)" \
   "설치 / 실행 / 사용 가이드. 단일 \`.md\` 파일 (\`INSTALLATION.md\`, \`USER_GUIDE.md\` 등) 흡수 대상."

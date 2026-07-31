@@ -69,6 +69,7 @@ chmod +x "$TARGET_DIR/update.sh" "$TARGET_DIR/audit.sh" \
 # 각 폴더에 역할·SSOT 링크를 담은 stub README 자동 배치 (기존 README 는 덮어쓰지 않음)
 mkdir -p \
   docs/architecture \
+  docs/code_updates \
   docs/usage \
   docs/issues_and_fixes \
   docs/assets \
@@ -96,6 +97,9 @@ write_stub() {
 
 write_stub docs/architecture/README.md "구조 · 설계 (architecture)" \
   "프로젝트 / 워크스페이스의 구조·설계 문서. ROS2 워크스페이스는 [documentation.md](../claude_guideline/documentation.md) §ROS2 특칙 참조 (패키지별 설계는 \`src/<pkg>/docs/architecture/\`)."
+
+write_stub docs/code_updates/README.md "코드 변경 로그 (code_updates)" \
+  "코드 수정 이력 entry 누적 (최신 위). 형식·위치 SSOT: [documentation.md](../claude_guideline/documentation.md) §code_updates 기록 형식. 기록 의무: [coding.md](../claude_guideline/coding.md) §수정 이력 기록."
 
 write_stub docs/usage/README.md "설치 · 실행 · 튜토리얼 (usage)" \
   "설치 / 실행 / 사용 가이드. 단일 \`.md\` 파일 (\`INSTALLATION.md\`, \`USER_GUIDE.md\` 등) 흡수 대상."
