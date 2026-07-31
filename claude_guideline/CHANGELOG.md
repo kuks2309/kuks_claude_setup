@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.13.0 — 2026-07-31
+
+"수정 전 읽기 → 수정 → 수정 후 기록" 사이클을 매번 기계 강제하는 훅 2종 추가. 문면·체크리스트(1.12.0)만으로는 세션이 빼먹을 수 있던 사이클을 도구 계층에서 차단.
+
+### 변경
+
+- `claude_guideline/hooks/pre_tool_use_require_module_docs_read.py` (신규, PreToolUse Edit|Write|MultiEdit): 코드 수정 시도 순간, 그 모듈의 `architecture/inventory.md`·`code_updates/` 를 이번 세션 transcript 에서 읽은 적 없으면 수정 거부 + 읽기 요구. 인벤토리 부재 모듈은 통과(생성은 Stop 훅 몫). guideline 도입 프로젝트(상위 `docs/claude_guideline/`)에서만 발동, `docs/`·`code_updates/`·`.claude/`·scratchpad·비코드 파일 제외.
+- `claude_guideline/hooks/stop_check_code_record_reflected.py` (신규, Stop): 매 응답 종료 시(세션 종료 아님) 이번 턴의 코드 수정이 `code_updates/`·`inventory.md` 반영 없이 끝나려 하면 1회 차단(`stop_hook_active` 가드) + 기록 반영 요구.
+- `claude_guideline/hooks/README.md`: §제공 hook 표 2행 + §설치(사이클 훅 2종) 절.
+- `claude_guideline/install.sh`, `update.sh`: `HOOK_FILES` + chmod 대상에 2종 추가.
+- 검증: 합성 transcript 11 케이스 (PreToolUse 5 — 미독 거부/읽은 후 허용/비도입 허용/인벤토리 부재 허용/기록 파일 허용, Stop 6 — 미기록 차단/code_updates 반영 통과/인벤토리 반영 통과/루프 가드/전 턴 무관/비도입) 전부 통과.
+
+### 트리거
+
+사용자 지시 (2026-07-31):
+
+> "코딩중에 기존 기록을 읽어야 합니다. 그리고 코딩후에 수정 내용 반영"
+> "매번 하지 않으면 코드 엉망이 되어서 만든 것인데 코드 수정전 읽고 수정후 기록 이것이 되풀이되어야 코드의 품질이 좋아짐"
+
+근본 원인: 1.12.0 까지 사이클은 규칙 문면 + 자기 점검 체크리스트 층만 존재 — 세션이 빼먹어도 물리적 차단 없음 (약어→1.8.7 Stop 훅, 주석 오염→1.11.0 PostToolUse 훅과 동형의 강제층 공백).
+
+### 호환성
+
+minor bump. 다운스트림은 update.sh 수신 후 `.claude/settings.json` 에 PreToolUse·Stop 등록 필요 (hooks/README §설치 참조). 미등록 시 규칙·체크리스트 층은 기존대로 동작.
+
 ## 1.12.0 — 2026-07-31
 
 인벤토리 운용 기본값 전환 — "없으면 생성하지 않음(별도 승인)" 을 "없으면 수정 파일 범위만큼 즉시 생성(증분)" 으로 뒤집고, 코드 수정 전 모듈 문서(인벤토리·code_updates) 읽기를 의무화.
