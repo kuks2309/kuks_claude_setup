@@ -6,7 +6,7 @@ module's inventory (architecture/inventory.md) and recent code_updates/ entries.
 This hook enforces the read half of the read->modify->record cycle.
 
 On Edit/Write/MultiEdit targeting a code file inside a guideline-adopting
-project (an ancestor directory contains docs/claude_guideline/), it scans the
+project (an ancestor has docs/claude_guideline/coding.md installed), it scans the
 session transcript for a prior Read (or Edit/Write) of that module's
 inventory.md / any code_updates/ file. If the docs exist but were never read
 this session, the tool call is denied with instructions to read them first.
@@ -38,9 +38,9 @@ def is_code_file(path):
 
 def find_module_docs(file_path):
     """Walk up from the edited file: nearest docs/architecture/inventory.md and
-    docs/code_updates/. Stop at the adopting project root, or at the first repo
-    boundary (.git) — a nested repo without its own docs/claude_guideline/ is
-    NOT adopting, even inside an adopting workspace."""
+    docs/code_updates/. Stop at the adopting project root (adoption = the rule
+    file docs/claude_guideline/coding.md is installed; a bare dir from partial
+    bundle installs does NOT adopt), or at the first repo boundary (.git)."""
     d = os.path.dirname(os.path.abspath(file_path))
     inventory, code_updates, adopting = None, None, False
     while True:
@@ -50,7 +50,7 @@ def find_module_docs(file_path):
             inventory = inv
         if code_updates is None and os.path.isdir(cu) and os.listdir(cu):
             code_updates = cu
-        if os.path.isdir(os.path.join(d, "docs", "claude_guideline")):
+        if os.path.isfile(os.path.join(d, "docs", "claude_guideline", "coding.md")):
             adopting = True
             break
         if os.path.exists(os.path.join(d, ".git")):
