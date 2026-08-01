@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.15.1 — 2026-08-01
+
+기록 사이클 게이트의 채택 판정 스코프 누수 수선 — 부분 번들 설치 repo 오발동 차단.
+
+### 변경
+
+- `claude_guideline/hooks/stop_check_code_record_reflected.py` · `claude_guideline/hooks/pre_tool_use_require_module_docs_read.py`: 채택 판정을 `docs/claude_guideline/` **폴더 존재** → **룰 파일 `docs/claude_guideline/coding.md` 존재**로 교체. git_workflow 등 일부 번들만 설치해 폴더만 있는 repo 에서 기록 사이클 전체가 발동하던 스코프 누수 제거 (활성화 게이트 원칙: 룰 파일이 없으면 룰 비활성).
+
+### 트리거
+
+실사격(2026-08-01): 번들 3종만 설치된 세션 worktree repo 의 entry-lint.sh 1줄 수정에 Stop 게이트가 발동, 그 repo 가 채택한 적 없는 code_updates/·architecture/ 구조 생성을 강제. 수선 후 실경로 3종 + 합성 트리 2종 판정 테스트 전부 PASS (미채택 False·채택 True·SSOT repo False 불변).
+
+### 호환성
+
+patch bump. coding.md 가 설치된 채택 repo 의 강제는 동일 — 미채택(부분 설치) repo 에서만 비활성.
+
 ## 1.15.0 — 2026-08-01
 
 C 계열 기본 중괄호 스타일 Allman 명문화 — 프로젝트별 선언이 없을 때의 기본값 공백 해소.
