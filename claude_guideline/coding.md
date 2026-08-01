@@ -72,7 +72,21 @@
 ## 코딩 스타일 (formatter / 컨벤션)
 
 - **프로젝트가 채택한 formatter 컨벤션을 따른다.** `.clang-format`, `.editorconfig`, `pyproject.toml` 등 저장소 내 설정 파일이 있으면 그것이 본 문서보다 우선한다.
-- 새 워크스페이스에서 컨벤션이 정해지지 않았다면, 워크스페이스 루트 `CLAUDE.md` 또는 모듈 CLAUDE.md 에 한 번 명시하고 그 이후 일관 적용한다 (예: C/C++ Allman vs K&R, Python `black` 등).
+- **기본 중괄호 스타일 (C/C++ 등 중괄호 언어): Allman.** 프로젝트 formatter 설정이나 모듈 규약이 달리 정하지 않는 한, `if`/`for`/`while`/`switch`/함수 정의의 여는 중괄호 `{` 는 다음 줄에 단독으로 둔다.
+
+  ```c
+  for (...)
+  {
+      ...
+  }
+
+  if (...)
+  {
+      ...
+  }
+  ```
+
+- 새 워크스페이스에서 컨벤션이 정해지지 않았다면, 워크스페이스 루트 `CLAUDE.md` 또는 모듈 CLAUDE.md 에 한 번 명시하고 그 이후 일관 적용한다 (예: Python `black` 등). C 계열 중괄호 스타일은 별도 선언이 없으면 위 Allman 기본값을 따른다.
 - 본 규칙은 새로 작성하는 코드부터 강제. 기존 코드는 수정 시 함께 reformat.
 - 모듈 CLAUDE.md 또는 `docs/` 도메인 문서에 명시된 컨벤션이 본 문서보다 우선.
 
