@@ -38,6 +38,15 @@ ROS2 워크스페이스 + 임베디드 / 외부 드라이버 결합 환경에 �
 4. **리셋 / 재연결 순서**: USB serial 재연결 시점에 보드 reset loop 또는 silent crash 가 발생할 수 있음. 호스트 측 자동 reconnect 동작과 충돌하지 않도록 수동 reset 시 호스트 노드 stop 권장.
 5. **빌드 환경 함정**: PlatformIO `pio run` 만 입력하면 `[platformio]` 의 `default_envs` 가 빌드된다. 양산 펌웨어는 반드시 `pio run -e <env_name> -t upload` 로 명시한다.
 
+## 시험 전 노드 중복 실행 방지 (SIL/HIL)
+
+시험(SIL (Software In the Loop) / HIL (Hardware In the Loop) 검정·성능 측정)의 오염 원인은 노드 중복 실행이다. ROS2 는 동일 이름 노드의 중복 실행을 막지 않으므로(경고만), 기동 자체를 통제한다. 같은 토픽에 발행자가 2개 이상 생기면 이후 모든 측정이 무효다.
+
+1. **기동 전 검사**: 노드를 실행하기 전 `ros2 node list` 와 `ps aux | grep <실행 파일>` 로 이번 시험과 겹치는 기존 노드·잔류 프로세스가 있는지 확인한다 (다중 호스트 환경이면 그래프에 보이는 원격 노드 포함).
+2. **잔류 정리 후 기동**: 겹치는 노드가 있으면 종료(이전 launch 프로세스 포함)하고, `ros2 daemon stop && ros2 daemon start` 로 캐시 갱신 후 node list 에서 사라진 것을 확인한 뒤 기동한다.
+3. **인스턴스 1개 원칙**: 같은 노드/launch 를 두 번 띄우지 않는다. launch 재실행 시 이전 실행 종료를 먼저 확인한다.
+4. **기동 후 확인**: 측정 대상 토픽은 `ros2 topic info <topic> -v` 로 발행자 수가 기대값(보통 1)인지 확인한 뒤 측정한다.
+
 ## 패키지 종류별 주의사항
 
 | 패키지 종류 | 빌드 시스템 | 주의 |
