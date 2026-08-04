@@ -36,7 +36,13 @@ def is_code_file(path):
 def in_adopting_project(file_path):
     """Walk up to the repo boundary (.git) only. Adoption = the record-cycle
     rule file (docs/claude_guideline/coding.md) is installed — a bare
-    docs/claude_guideline/ dir from partial bundle installs does NOT adopt."""
+    docs/claude_guideline/ dir from partial bundle installs does NOT adopt.
+
+    A path that no longer exists is not attributable: its repo boundary may
+    have vanished with it (e.g. a merged-and-removed session worktree), letting
+    the walk escape into an enclosing adopting workspace — skip such files."""
+    if not os.path.exists(file_path):
+        return False
     d = os.path.dirname(os.path.abspath(file_path))
     while True:
         if os.path.isfile(os.path.join(d, "docs", "claude_guideline", "coding.md")):
