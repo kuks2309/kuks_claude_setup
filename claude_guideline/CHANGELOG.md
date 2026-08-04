@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.16.1 — 2026-08-04
+
+Stop 기록 게이트의 소멸 경로 오탐 수선 — 세션 worktree 정리 후 경계 탈출 차단.
+
+### 변경
+
+- `claude_guideline/hooks/stop_check_code_record_reflected.py`: `in_adopting_project` 에 대상 실존 가드 추가 — 수정된 파일이 Stop 시점에 존재하지 않으면 (예: 병합 후 제거된 세션 worktree 내부 파일) 채택 판정에서 제외. 소멸한 repo 의 `.git` 경계가 사라져 걷기가 상위 채택 워크스페이스로 탈출, 무관한 기록 생성을 요구하던 오탐 제거.
+
+### 트리거
+
+실사격(2026-08-04): 세션 브랜치 병합·worktree 정리 직후 Stop 게이트가 이미 소멸한 worktree 의 install.sh 에 워크스페이스 기록을 요구. 유령 경로 False·실존 채택 True 판정 테스트 3종 PASS.
+
+### 호환성
+
+patch bump. 실존 파일의 강제는 동일 — Edit/Write 후 삭제·정리된 경로만 집계 제외 (한계: 세션이 의도적으로 삭제한 코드 파일의 기록 의무도 함께 제외됨 — 삭제 이력은 git commit 이 담당).
+
 ## 1.16.0 — 2026-08-03
 
 SIL (Software In the Loop) / HIL (Hardware In the Loop) 시험의 노드 중복 실행 방지 룰 신설 — 측정 오염의 근본 원인을 기동 전 게이트로 차단.
