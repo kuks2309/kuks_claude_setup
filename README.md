@@ -1,5 +1,7 @@
 # kuks_claude_setup
 
+**git 협업 모드: solo** — `origin`(kuks2309 개인) 단독 원격, 현재 추적 분기에 직접 commit/push 하며 PR(Pull Request) 은 사용하지 않는다. 공동 작업으로 전환하면 본 줄을 `team` 으로 갱신한다.
+
 Claude Code 프로젝트를 위한 고도화된 작업 지침(SOP)과 한국 실무 환경(ROS2, 임베디드, HWP/PPTX)에 최적화된 자동화 스킬 모음.
 
 > Korean-first specialist setup for Claude Code, ROS2, and Korean Business Automation.
